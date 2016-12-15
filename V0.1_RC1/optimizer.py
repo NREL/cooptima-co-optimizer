@@ -9,11 +9,11 @@ from pyomo.opt import SolverFactory
 import pyomo.environ
 import matplotlib.pyplot as plt
 
-from fuelsdb_interface import make_property_vector
+from fuelsdb_interface import make_property_dict
 
 def run_optimize(cstar, KK, propDB):
         print("Running optimizer based on IPOPT for c^* = {}, KK={}".format(cstar, KK))
-        ncomp, spc_names, propvec = make_property_vector(propDB)
+        ncomp, spc_names, propvec = make_property_dict(propDB)
 
         def obj_fun(model):
             this_ron = blend_linear_pyomo(model,'RON')

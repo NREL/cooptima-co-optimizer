@@ -46,7 +46,7 @@ if __name__ == '__main__':
         n = len(cooptimizer_input.KVEC)
         print ("Running {} K values: {}".format(n, cooptimizer_input.KVEC))
         ncomp, spc_names, propvec = make_property_vector(propDB)
-
+    
 
         if cooptimizer_input.use_pyomo and cooptimizer_input.use_deap_NSGAII:
             print("Choose only 1 optimizer method (not use_pyomo and use_deap_NSGAII)!")

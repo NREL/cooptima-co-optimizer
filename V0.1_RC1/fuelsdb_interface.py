@@ -49,6 +49,52 @@ def make_property_vector(propDB):
 
     return ncomp, SPNM, propvec
 
+def make_property_dict(propDB):
+       
+    # Assemble property vectors for each composition
+    # Basically just transpose the information in propDB
+    ncomp = 0
+    SPNM = []
+    for k in propDB.keys():
+        for kk in propDB[k].keys():
+            print ("key: {}".format(kk))
+        SPNM.append(k)
+    ncomp = len(SPNM)
+
+    RONVEC = {}
+    SVEC = {}
+    ONVEC = {}
+    HoVVEC = {}
+    SLVEC = {}
+    LFV150VEC = {}
+    PMIVEC = {}
+    COSTVEC = {}
+    XVEC = {}
+
+    
+    for i in range(1, ncomp+1):
+        RONVEC[i] =  ( propDB[SPNM[i-1]]['RON'] )
+        SVEC[i] =  ( propDB[SPNM[i-1]]['S'] )
+        ONVEC[i] =  ( propDB[SPNM[i-1]]['ON'] )
+        HoVVEC[i] =  ( propDB[SPNM[i-1]]['HoV'] )
+        SLVEC[i] =  ( propDB[SPNM[i-1]]['SL'] )
+        LFV150VEC[i] =  ( propDB[SPNM[i-1]]['LFV150'] )
+        PMIVEC[i] =  ( propDB[SPNM[i-1]]['PMI'] )
+        COSTVEC[i] =  ( propDB[SPNM[i-1]]['COST'] )
+        XVEC[i] =  0.05
+
+    propvec = {}
+    propvec['RON'] = RONVEC.copy()
+    propvec['S'] = SVEC.copy()
+    propvec['ON'] = ONVEC.copy()
+    propvec['HoV'] = HoVVEC.copy()
+    propvec['SL'] = SLVEC.copy()
+    propvec['LFV150'] = LFV150VEC.copy()
+    propvec['PMI'] = PMIVEC.copy()
+    propvec['COST'] = COSTVEC.copy()
+
+    return ncomp, SPNM, propvec
+
 def load_fuelsdb(dbfile, cas=None):
     propDB = {}
     print("Reading fuel properties database")

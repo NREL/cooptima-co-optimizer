@@ -30,8 +30,8 @@ task_list['find_min_cost_sol'] = False
 task_list['displace_components'] = False
 # -----------------------------------------------------------------------------
 # How the optimizer does its work
-use_pyomo = False
-use_deap_NSGAII = True
+use_pyomo = True
+use_deap_NSGAII = False
 
 # -----------------------------------------------------------------------------
 # Other input / data files
