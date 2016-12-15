@@ -1,4 +1,6 @@
 import numpy as np
+from pyomo.environ import *
+
 
 # General blend function - not currently used
 def blend_fcn(prop, propDB, comp):
@@ -13,11 +15,12 @@ def blend_fcn(prop, propDB, comp):
         'PMI': blend_linear,
         'MOLWT': blend_linear,
         'BP': blend_linear,
-        'HoF_liq':blend_linear,
-        'LHV':blend_linear,
+        'HoF_liq': blend_linear,
+        'LHV': blend_linear,
     }
     fblend = prop_blend.get(prop)
     return fblend(prop, propDB, comp)
+
 
 # Variations of linear blending for different arguments
 # This is the general one
@@ -33,36 +36,27 @@ def blend_linear_propDB(prop, propDB, comp):
     return prop
 
 
-#def eval_prop_linear(propDB, comp, prop='COST'):
-#    pval = 0.0
-#    for k, v in comp.iteritems():
-#        pval += propDB[k][prop]*v
-#    return pval
-
-
-
 # This is the one for pyomo
-from pyomo.environ import *
 def blend_linear_pyomo(model, whichprop):
     if whichprop == 'RON':
-        return summation( model.X, model.RON,index=model.I)
+        return summation(model.X, model.RON, index=model.I)
     elif whichprop == 'S':
-        return  summation( model.X, model.S,index=model.I)
+        return summation(model.X, model.S, index=model.I)
     elif whichprop == 'ON':
-        return  summation( model.X, model.ON,index=model.I)
+        return summation(model.X, model.ON, index=model.I)
     elif whichprop == 'HoV':
-        return  summation( model.X, model.HoV,index=model.I)
+        return summation(model.X, model.HoV, index=model.I)
     elif whichprop == 'SL':
-        return summation( model.X, model.SL,index=model.I)
+        return summation(model.X, model.SL, index=model.I)
     elif whichprop == 'LFV150':
-        return summation( model.X, model.LFV150,index=model.I)
+        return summation(model.X, model.LFV150, index=model.I)
     elif whichprop == 'PMI':
-        return summation( model.X, model.PMI,index=model.I)
+        return summation(model.X, model.PMI, index=model.I)
     else:
         print("Unknown property {}".format(whichprop))
         sys.exit(-1)
-# Check this one too.
+
+
+# This is the one for general (numpy based) use, including nsga2
 def blend_linear_vec(x_vec, prop_vec, whichprop):
     return np.sum(x_vec*prop_vec[whichprop])
-
-
