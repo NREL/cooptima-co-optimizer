@@ -95,8 +95,11 @@ def make_property_dict(propDB):
 
     return ncomp, SPNM, propvec
 
-def load_fuelsdb(dbfile, cas=None):
+def load_fuelsdb(dbfile, cas=None, propDB_initial=None):
     propDB = {}
+    if propDB is not None:
+        propDB = propDB_initial.copy()
+   
     print("Reading fuel properties database")
     with open(dbfile) as fueldbfile:
         fuelsdb = csv.reader(fueldbfile, delimiter=',', quotechar='\"')
@@ -180,10 +183,10 @@ def write_xl_db(propDB, outfile, order=None, keyorder=None):
     wb.save(outfile)
 
     
-def load_propDB(fname):
+def load_propDB(fname, propDB_initial=None, maxrows=18, maxcols=14):
     xl_wb = xlrd.open_workbook(fname)
     xl_s = xl_wb.sheet_by_index(0)
-    cas_col = xl_s.col(3)
+    cas_col = xl_s.col(0)
     id_col = xl_s.col(0)
     cas = []
     ids = []
@@ -191,18 +194,30 @@ def load_propDB(fname):
 
     i = 0
     propDB = {}
-    for i in range(1,18):
-        vals = xl_s.row(i)[0:15]
+    if propDB_initial is not None:
+        propDB = propDB_initial.copy()
+    for i in range(1,maxrows):
+        vals = xl_s.row(i)[0:maxcols]
         newcomponent = {}
         for h,v in zip(hdr,vals):
             newcomponent[h.value] = v.value
-        propDB[newcomponent['CAS']] = (copy.deepcopy(newcomponent))
+        # If no initial database was supplied, just copy the entire dictionary over
+        if propDB_initial is None:
+            propDB[newcomponent['CAS']] = (copy.deepcopy(newcomponent))
+        else:
+            for k,v in newcomponent.iteritems():
+                print "Old record", propDB[newcomponent['CAS']]
+                if k is not 'CAS':
+                    print "adding key: ", k, ' value:', v
+                    propDB[newcomponent['CAS']][k] = v
 
-    for cas, rec in propDB.iteritems():
-        propDB[cas]['NAME'] = "RON {},Sl {}".format(propDB[cas]['RON'],
-                                                    propDB[cas]['SL'])
+    # for cas, rec in propDB.iteritems():
+    #     propDB[cas]['NAME'] = "RON {},Sl {}".format(propDB[cas]['RON'],
+    #                                                 propDB[cas]['SL'])
         
+    print "PROPDB:", propDB
     return propDB
+
 
 
 

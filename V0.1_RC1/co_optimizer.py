@@ -27,8 +27,9 @@ if __name__ == '__main__':
     print ('--------------------------------------')
     print ("Setting up:")
     print ("Reading fuel component properties from: ", cooptimizer_input.component_properties_database)
-    propDB = load_propDB(cooptimizer_input.component_properties_database)
-    print ("<skipped> Reading fuel component costs from: ", cooptimizer_input.component_cost_database)
+    propDB = load_propDB(cooptimizer_input.component_properties_database,maxrows=18,maxcols=14)
+    print ("Reading fuel component costs from: ", cooptimizer_input.component_cost_database)
+    propDB = load_propDB(cooptimizer_input.component_cost_database,propDB_initial=propDB, maxrows=18,maxcols=2)
     print ('--------------------------------------')
     
     output_files = []
