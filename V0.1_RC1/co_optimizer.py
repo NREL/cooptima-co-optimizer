@@ -53,7 +53,6 @@ if __name__ == '__main__':
             sys.exit(-2)
         for KK,col,mk in zip(cooptimizer_input.KVEC,clr[0:n+1],mrk[0:n+1]):
             if cooptimizer_input.use_pyomo:
-                print("hi co-opt")
                 C = []
                 M = []
                 for cs in np.linspace(1.5,15.0, 10):
@@ -68,7 +67,7 @@ if __name__ == '__main__':
                 sys.exit(-1)
             plt.scatter(C, M,label="K={}".format(KK),marker=mk, color=col)
             plt.xlabel('Cost')
-            plt.ylabel('MMF')
+            plt.ylabel('Merit')
             #plt.savefig("mmf_pareto_K={}.pdf".format(KK),form='pdf')
         #plt.close()
         plt.legend(loc=8, ncol= 3,fontsize=10)

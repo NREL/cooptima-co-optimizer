@@ -15,17 +15,13 @@
 
 import array
 import random
-import json
+#import json
 
 import numpy
 
-from math import sqrt
+#from math import sqrt
 
-import matplotlib.pyplot as plt
-
-from fuelsdb_interface import *
-import cooptima_plotting_tools as cpt
-from merit_functions import mmf_single, mft_mmf
+from merit_functions import mmf_single
 from blend_functions import blend_linear_vec as blend
 
 from deap import algorithms
@@ -34,17 +30,6 @@ from deap import benchmarks
 from deap.benchmarks.tools import diversity, convergence
 from deap import creator
 from deap import tools
-
-def eval_prop_linear(propDB, comp, prop='COST'):
-    pval = 0.0
-    for k, v in comp.iteritems():
-        pval += propDB[k][prop]*v
-    return pval
-
-
-
-import property_mapping as pm
-from fuelsdb_interface import load_propDB, make_property_vector
 
 
 def fraction_constraint(individual): #compute the constraint function value (sum over all parameters = 1)
@@ -83,6 +68,7 @@ def uniform(low, up, size=None): #generate uniform random numbrs in [0,1] and sc
     Y=[X[ii]/sumX for ii in range(len(X))] #divide each individual's parameters by the sum to satisfy sum x = 1 constraint;
     return Y 
 
+
 def scale():
     def decorator(func):
         def wrapper(*args, **kargs):
@@ -97,9 +83,10 @@ def scale():
         return wrapper
     return decorator
 
+
 def nsga2_pareto_K(KK, propvec,seed=None):
 
-    NDIM = 17 #number of parameters
+    NDIM = len(propvec['COST']) #number of parameters
 
     creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0)) #minimize both objectives (min -f(x) if maximization is needed)
     creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin) #individuals in the generation
@@ -192,27 +179,4 @@ def nsga2_pareto_K(KK, propvec,seed=None):
     return front[:,1], -front[:,0]
 
 #    return pop, logbook, hof, pf
-        
-#if __name__ == "__main__":
-#    
-#    KVEC = [-2.0, -1.5, -1.0,-0.5, 0.5,  1.0, 1.5,2.0,2.5,3.0,3.5,4.0] #-vector
-#    clr =  ['fuchsia','b' ,  'g', 'r', 'y',  'm', 'c','k','g','r','y','m']
-#    mrk =  ['o',  'o', 'o',  'o', 'o', 'o',  'o', 'o','x','x','x','x','x']
-#    plt.close()
-#    propDB = load_propDB("propDB_fiction.xls")
-#    for KK,col,mk in zip(KVEC,clr,mrk):
-#
-#        # pop, stats, hof, pf = nsga2_pareto_K(propDB, KK)
-#        # pop.sort(key=lambda x: x.fitness.values)    
-#        # front = numpy.array([ind.fitness.values for ind in pop])
-#        front = nsga2_pareto_K(propDB,KK)
-#        numpy.savetxt('test.out', front)
-#        plt.scatter(front[:,1], -front[:,0], label="K={}".format(KK),marker=mk, color=col)
-#        
-#    plt.axis("tight")
-#    plt.xlabel('Cost')
-#    plt.ylabel('MMF')
-#    plt.legend(loc=8, ncol= 3,fontsize=10)
-#    plt.savefig("nsga2_pareto_K={}.pdf".format(KK),form='pdf')
-#    plt.close()
-#    
+  
