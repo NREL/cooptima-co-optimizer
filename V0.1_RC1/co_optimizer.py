@@ -20,6 +20,28 @@ import cooptimizer_input
 clr = ['fuchsia', 'b', 'g', 'r', 'y', 'm', 'c', 'k', 'g', 'r', 'y', 'm']
 mrk = ['o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'x', 'x', 'x', 'x', 'x']
 
+
+def write_composition(f, c, hdr_in=None, prefix=None):
+    vals = ""
+    hdr = []
+    if hdr_in is None:
+        for k in c:
+            hdr.append(k)
+        if prefix is not None:
+            for i in range(len(prefix)):
+                f.write("\t")
+        for h in hdr:
+            f.write("{}\t".format(h))
+        f.write("\n")
+    else:
+        hdr = hdr_in.copy()
+
+    for h in hdr:
+        f.write("{}\t".format(c[h]))
+    f.write("\n")
+
+
+    
 if __name__ == '__main__':
 
     print ("=================================================================")
@@ -49,6 +71,7 @@ if __name__ == '__main__':
 
     if cooptimizer_input.task_list['cost_vs_merit_Pareto']:
         plt.close()
+        compfile = open(cooptimizer_input.cost_vs_merit_datafilename,'w')
         print ("Running cost vs merit function Pareto front analysis")
         n = len(cooptimizer_input.KVEC)
         print ("Running {} K values: {}".format(n, cooptimizer_input.KVEC))
@@ -58,17 +81,19 @@ if __name__ == '__main__':
             print("Choose only 1 optimizer method")
             print("(not use_pyomo and use_deap_NSGAII)!")
             sys.exit(-2)
-
         for KK, col, mk in zip(cooptimizer_input.KVEC, clr[0:n+1], mrk[0:n+1]):
             if cooptimizer_input.use_pyomo:
                 C = []
                 M = []
+                compfile.write("K = {}-------------------------\n".format(KK))
                 for cs in np.linspace(1.5, 15.0, 10):
                     comp, isok = run_optimize_pyomo_C(cs, KK, propDB)
                     if (isok):
                         c, m = comp_to_cost_mmf(comp, propDB, KK)
                         C.append(c)
                         M.append(m)
+                        write_composition(compfile, comp)
+                compfile.write("\n")
             elif cooptimizer_input.use_deap_NSGAII:
                 C, M = run_optmize_nsga2(KK, propvec)
             else:
@@ -78,12 +103,13 @@ if __name__ == '__main__':
             plt.xlabel('Cost')
             plt.ylabel('Merit')
         plt.legend(loc=8, ncol=3, fontsize=10)
-        pareto_fname = "mmf_pareto_Ksweep.pdf"
-        plt.savefig(pareto_fname, form='pdf')
-        output_files.append(pareto_fname)
+        plt.savefig(cooptimizer_input.cost_vs_merit_plotfilename, form='pdf')
+        output_files.append(cooptimizer_input.cost_vs_merit_plotfilename)
+        output_files.append(cooptimizer_input.cost_vs_merit_datafilename)
 
     if cooptimizer_input.task_list['K_vs_merit_sweep']:
         plt.close()
+        compfile = open(cooptimizer_input.k_sweep_datafilename,'w')
         print ("Running K vs merit function sweep")
         n = len(cooptimizer_input.KVEC)
         # print ("Running {} K values: {}".format(n, cooptimizer_input.KVEC))
@@ -100,9 +126,12 @@ if __name__ == '__main__':
 
         M = []
         for KK, col, mk in zip(cooptimizer_input.KVEC, clr[0:n+1], mrk[0:n+1]):
+            compfile.write("K = {}-------------------------\n".format(KK))
             if cooptimizer_input.use_pyomo:
                 comp, isok = run_optimize_pyomo_K(KK, propDB)
                 if (isok):
+                    write_composition(compfile, comp)
+                    compfile.write("\n")
                     m = comp_to_mmf(comp, propDB, KK)
                     M.append(m)
             elif cooptimizer_input.use_deap_NSGAII:
@@ -115,9 +144,9 @@ if __name__ == '__main__':
         plt.scatter(cooptimizer_input.KVEC, M)
         plt.xlabel('K')
         plt.ylabel('Merit')
-        pareto_fname = "mmf_Ksweep.pdf"
-        plt.savefig(pareto_fname, form='pdf')
-        output_files.append(pareto_fname)
+        plt.savefig(cooptimizer_input.k_sweep_plotfilename, form='pdf')
+        output_files.append(cooptimizer_input.k_sweep_plotfilename)
+        output_files.append(cooptimizer_input.k_sweep_datafilename)
 
     print("==================================================================")
     print("Analysis completed; new output files")

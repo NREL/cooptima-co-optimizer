@@ -18,7 +18,7 @@ task_list['cost_vs_merit_Pareto'] = True
 
 
 # Run a tradeoff analysis between engine design and obtainable merit function
-task_list['K_vs_merit_sweep'] = False
+task_list['K_vs_merit_sweep'] = True
 
 # Find the composition that maximizes the merit function subject to constraints
 # below - NOT YET IMPLEMENTED,  PLACEHOLDER FOR FUTURE DEV
@@ -43,6 +43,13 @@ print("CAUTION --- USING PLACEHOLDER PROPERTIES")
 component_properties_database = 'propDB_fiction.xls'
 component_cost_database = 'costDB_fiction.xls'
 
+# -----------------------------------------------------------------------------
+# Output file names
+cost_vs_merit_datafilename = "cost_merit_pareto.txt"
+cost_vs_merit_plotfilename = "cost_merit_pareto.pdf"
+
+k_sweep_datafilename = "ksweep.txt"
+k_sweep_plotfilename = "ksweep.pdf"
 # -----------------------------------------------------------------------------
 # Displace components setup - PLACEHOLDER FOR FUTURE DEVELOPMENT
 # displacement_setup['Displaced_component'] = 'A'
