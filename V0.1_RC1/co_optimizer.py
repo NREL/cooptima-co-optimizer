@@ -41,7 +41,6 @@ def write_composition(f, c, hdr_in=None, prefix=None):
     f.write("\n")
 
 
-    
 if __name__ == '__main__':
 
     print ("=================================================================")
@@ -71,7 +70,7 @@ if __name__ == '__main__':
 
     if cooptimizer_input.task_list['cost_vs_merit_Pareto']:
         plt.close()
-        compfile = open(cooptimizer_input.cost_vs_merit_datafilename,'w')
+        compfile = open(cooptimizer_input.cost_vs_merit_datafilename, 'w')
         print ("Running cost vs merit function Pareto front analysis")
         n = len(cooptimizer_input.KVEC)
         print ("Running {} K values: {}".format(n, cooptimizer_input.KVEC))
@@ -109,7 +108,7 @@ if __name__ == '__main__':
 
     if cooptimizer_input.task_list['K_vs_merit_sweep']:
         plt.close()
-        compfile = open(cooptimizer_input.k_sweep_datafilename,'w')
+        compfile = open(cooptimizer_input.k_sweep_datafilename, 'w')
         print ("Running K vs merit function sweep")
         n = len(cooptimizer_input.KVEC)
         # print ("Running {} K values: {}".format(n, cooptimizer_input.KVEC))
