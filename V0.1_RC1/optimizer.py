@@ -12,7 +12,8 @@ from fuelsdb_interface import make_property_dict
 
 
 def run_optimize_vs_C(cstar, KK, propDB, initial_X=None):
-        print("Running optimizer based on IPOPT for c^* = {}, KK={}".format(cstar, KK))
+        print("Running optimizer based on"
+              " IPOPT for c^* = {}, KK={}".format(cstar, KK))
         ncomp, spc_names, propvec = make_property_dict(propDB)
 
         def obj_fun(model):
@@ -73,26 +74,36 @@ def run_optimize_vs_C(cstar, KK, propDB, initial_X=None):
 
         # inst = model.create_instance()
         # result = opt.solve(model, tee=True,
-        #                   options={'bound_push':1.0e-20,'warm_start_init_point':'yes','acceptable_tol':1.0e-15,'max_iter':10000})
-        result = opt.solve(model, options={'max_iter':10000})
+        #                   options={'bound_push':1.0e-20,
+        #                            'warm_start_init_point':'yes',
+        #                            'acceptable_tol':1.0e-15,
+        #                             'max_iter':10000})
+        result = opt.solve(model, options={'max_iter': 10000})
         newcomp = {}
         isok = True
-        if (result.solver.status == SolverStatus.ok): 
-            isok = True 
+        if (result.solver.status == SolverStatus.ok):
+            isok = True
         else:
-            print "... Something wrong, need maybe try restaring from somewhere else..."
-            newcomp, perturbok = run_optimize(cstar*1.1, KK, propDB, initial_X=None)
+            print "... Something wrong, maybe try restaring "\
+                  " trying to find a new starting place from a"\
+                  " perturbed problem"
+            newcomp, perturbok = run_optimize_vs_C(cstar*1.1, KK,
+                                    propDB, initial_X=None)
             if (perturbok):
-                print "... Perturbed solution succeeded, setting up to restart from it"
+                print "... Perturbed solution succeeded, "\
+                      "setting up to restart from it"
                 for i in range(1, ncomp+1):
                     model.X[i].value = newcomp[spc_names[i-1]]
 
-                perturbokresult = opt.solve(model, options={'max_iter':10000})
+                perturbokresult = opt.solve(model,
+                                            options={'max_iter': 10000})
                 if (perturbokresult.solver.status == SolverStatus.ok):
-                    print "... Found solution to original problem from perturbed solution, success"
+                    print "... Found solution to original problem"\
+                           " from perturbed solution, success"
                     isok = True
                 else:
-                    print "... Failed to find solution to original problem from perturbed solution"
+                    print "... Failed to find solution to original"\
+                          " problem from perturbed solution"
                     isok = False
 
             else:
@@ -167,26 +178,33 @@ def run_optimize_vs_K(KK, propDB, initial_X=None):
 
         # inst = model.create_instance()
         # result = opt.solve(model, tee=True,
-        #                   options={'bound_push':1.0e-20,'warm_start_init_point':'yes','acceptable_tol':1.0e-15,'max_iter':10000})
-        result = opt.solve(model, options={'max_iter':10000})
+        #                   options={'bound_push':1.0e-20,'warm_start_init_point':'yes',
+        # 'acceptable_tol':1.0e-15,'max_iter':10000})
+        result = opt.solve(model, options={'max_iter': 10000})
         newcomp = {}
         isok = True
-        if (result.solver.status == SolverStatus.ok): 
-            isok = True 
+        if (result.solver.status == SolverStatus.ok):
+            isok = True
         else:
-            print "... Something wrong, need maybe try restaring from somewhere else..."
-            newcomp, perturbok = run_optimize_vs_K(KK*1.1, propDB, initial_X=None)
+            print "... Something wrong, maybe try restaring "\
+                  " trying to find a new starting place from a"\
+                  " perturbed problem"
+            newcomp, perturbok = run_optimize_vs_K(KK*1.1, propDB,
+                                                   initial_X=None)
             if (perturbok):
-                print "... Perturbed solution succeeded, setting up to restart from it"
+                print "... Perturbed solution succeeded,"\
+                      " setting up to restart from it"
                 for i in range(1, ncomp+1):
                     model.X[i].value = newcomp[spc_names[i-1]]
 
-                perturbokresult = opt.solve(model, options={'max_iter':10000})
+                perturbokresult = opt.solve(model, options={'max_iter': 10000})
                 if (perturbokresult.solver.status == SolverStatus.ok):
-                    print "... Found solution to original problem from perturbed solution, success"
+                    print "... Found solution to original problem \
+                    from perturbed solution, success"
                     isok = True
                 else:
-                    print "... Failed to find solution to original problem from perturbed solution"
+                    print "... Failed to find solution to original"\
+                          " problem from perturbed solution"
                     isok = False
 
             else:
@@ -204,7 +222,6 @@ def run_optimize_vs_K(KK, propDB, initial_X=None):
         return comp, isok
 
 
-
 def comp_to_cost_mmf(comp, propDB, k):
         # Evaluate resulting mmf value
         # print comp
@@ -212,14 +229,16 @@ def comp_to_cost_mmf(comp, propDB, k):
         props = {}
         for p in prop_list:
             props[p] = blend_linear_propDB(p, propDB, comp)
-        mmf = mmf_single(RON=props['RON'], S=props['S'], ON=props['ON'], HoV=props['HoV'], SL=props['SL'],
+        mmf = mmf_single(RON=props['RON'], S=props['S'], ON=props['ON'],
+                         HoV=props['HoV'], SL=props['SL'],
                          LFV150=props['LFV150'], PMI=props['PMI'], K=k)
         cost = blend_linear_propDB('COST', propDB, comp)
 #        print "Cost: {}, cstar = {} ".format(cost,cstar)
 
         # This to make a radar plot of the composition for each solution
-        # cpt.plot_comp_radar(propDB, comp, savefile="{}_mfK{}".format(cstar,KK),
-        #                     title="Composition, C*={}, mmf={:.2f}".format(cstar,mmf))
+        # cpt.plot_comp_radar(propDB,comp,savefile="{}_mfK{}".format(cstar,KK),
+        #                     title="Composition, "\
+        #                     "C*={}, mmf={:.2f}".format(cstar,mmf))
         return cost, mmf
 
 
@@ -230,12 +249,9 @@ def comp_to_mmf(comp, propDB, k):
         props = {}
         for p in prop_list:
             props[p] = blend_linear_propDB(p, propDB, comp)
-        mmf = mmf_single(RON=props['RON'], S=props['S'], ON=props['ON'], HoV=props['HoV'], SL=props['SL'],
+        mmf = mmf_single(RON=props['RON'], S=props['S'], ON=props['ON'],
+                         HoV=props['HoV'], SL=props['SL'],
                          LFV150=props['LFV150'], PMI=props['PMI'], K=k)
         cost = blend_linear_propDB('COST', propDB, comp)
-#        print "Cost: {}, cstar = {} ".format(cost,cstar)
 
-        # This to make a radar plot of the composition for each solution
-        # cpt.plot_comp_radar(propDB, comp, savefile="{}_mfK{}".format(cstar,KK),
-        #                     title="Composition, C*={}, mmf={:.2f}".format(cstar,mmf))
         return mmf

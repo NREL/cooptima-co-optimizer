@@ -22,11 +22,11 @@ mrk = ['o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'x', 'x', 'x', 'x', 'x']
 
 if __name__ == '__main__':
 
-    print ("====================================")
+    print ("=================================================================")
     print ("Welcome to the Co-optimizer")
-    print ("====================================")
+    print ("=================================================================")
 
-    print ('--------------------------------------')
+    print ('-----------------------------------------------------------------')
     print ("Setting up:")
     print ("Reading fuel component properties from: ",
            cooptimizer_input.component_properties_database)
@@ -36,7 +36,7 @@ if __name__ == '__main__':
            cooptimizer_input.component_cost_database)
     propDB = load_propDB(cooptimizer_input.component_cost_database,
                          propDB_initial=propDB, maxrows=18, maxcols=2)
-    print ('--------------------------------------')
+    print ('-----------------------------------------------------------------')
 
     output_files = []
 
@@ -64,7 +64,7 @@ if __name__ == '__main__':
                 C = []
                 M = []
                 for cs in np.linspace(1.5, 15.0, 10):
-                    comp, isok = run_optimize_pyomo(cs, KK, propDB)
+                    comp, isok = run_optimize_pyomo_C(cs, KK, propDB)
                     if (isok):
                         c, m = comp_to_cost_mmf(comp, propDB, KK)
                         C.append(c)
@@ -81,7 +81,6 @@ if __name__ == '__main__':
         pareto_fname = "mmf_pareto_Ksweep.pdf"
         plt.savefig(pareto_fname, form='pdf')
         output_files.append(pareto_fname)
-
 
     if cooptimizer_input.task_list['K_vs_merit_sweep']:
         plt.close()
@@ -113,18 +112,16 @@ if __name__ == '__main__':
                 sys.exit(-1)
         print ("{}".format(cooptimizer_input.KVEC))
         print ("{}".format(M))
-        plt.scatter(cooptimizer_input.KVEC, M) #, label="K={}".format(KK), marker=mk, color=col)
+        plt.scatter(cooptimizer_input.KVEC, M)
         plt.xlabel('K')
         plt.ylabel('Merit')
-        plt.legend(loc=8, ncol=3, fontsize=10)
         pareto_fname = "mmf_Ksweep.pdf"
         plt.savefig(pareto_fname, form='pdf')
         output_files.append(pareto_fname)
 
-
-    print("====================================")
+    print("==================================================================")
     print("Analysis completed; new output files")
     for f in output_files:
         print(f)
-    print("====================================")
+    print("==================================================================")
     sys.exit(0)

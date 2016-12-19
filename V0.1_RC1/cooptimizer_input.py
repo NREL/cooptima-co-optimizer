@@ -14,11 +14,11 @@ component_max = {}
 # What the co-optimizer should do
 
 # Run a tradeoff analysis between cost and obtainable merit function
-task_list['cost_vs_merit_Pareto'] = False
+task_list['cost_vs_merit_Pareto'] = True
 
 
 # Run a tradeoff analysis between engine design and obtainable merit function
-task_list['K_vs_merit_sweep'] = True
+task_list['K_vs_merit_sweep'] = False
 
 # Find the composition that maximizes the merit function subject to constraints
 # below - NOT YET IMPLEMENTED,  PLACEHOLDER FOR FUTURE DEV
@@ -39,6 +39,7 @@ use_deap_NSGAII = False
 
 # -----------------------------------------------------------------------------
 # Other input / data files
+print("CAUTION --- USING PLACEHOLDER PROPERTIES")
 component_properties_database = 'propDB_fiction.xls'
 component_cost_database = 'costDB_fiction.xls'
 
