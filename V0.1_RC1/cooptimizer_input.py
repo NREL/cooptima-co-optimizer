@@ -14,7 +14,7 @@ component_max = {}
 # What the co-optimizer should do
 
 # Run a tradeoff analysis between cost and merit function
-task_list['cost_vs_merit_Pareto'] = False
+task_list['cost_vs_merit_Pareto'] = True
 
 # Find the composition that maximizes the merit function subject to constraints
 # below - NOT YET IMPLEMENTED,  PLACEHOLDER FOR FUTURE DEV
@@ -24,26 +24,27 @@ task_list['cost_vs_merit_Pareto'] = False
 # value for the least cost - NOT YET IMPLEMENTED, PLACEHOLDER FOR FUTURE DEV
 # task_list['find_min_cost_sol'] = False
 
-# Find a list of (n) components that could displace a given component in a 
-# reference fuel blend. Inputs for 'displacement_setup' below must be 
+# Find a list of (n) components that could displace a given component in a
+# reference fuel blend. Inputs for 'displacement_setup' below must be
 # filled in,  NOT YET IMPLEMENTED, PLACEHOLDER FOR FUTURE DEV
 # task_list['displace_components'] = False
 # -----------------------------------------------------------------------------
 # How the optimizer does its work
-use_pyomo = False
-use_deap_NSGAII = True
+use_pyomo = True
+use_deap_NSGAII = False
 
 # -----------------------------------------------------------------------------
 # Other input / data files
 component_properties_database = 'propDB_fiction.xls'
-component_cost_database = 'costDB_fiction.xls' 
+component_cost_database = 'costDB_fiction.xls'
 
 # -----------------------------------------------------------------------------
 # Displace components setup - PLACEHOLDER FOR FUTURE DEVELOPMENT
 # displacement_setup['Displaced_component'] = 'A'
 # displacement_setup['Number_max_new_components'] = 2
-# displacement_setup['Min_displaced_volume_fraction'] = 0.2 # Ttl for new comps.
-# displacement_setup['Max_displaced_volume_fraction'] = 0.4 # Ttl for new comps.
+# Ttls for new components
+# displacement_setup['Min_displaced_volume_fraction'] = 0.2
+# displacement_setup['Max_displaced_volume_fraction'] = 0.4
 # displacement_setup['Ref_composition'] = {}
 # displacement_setup['Ref_composition']['3'] = 0.2
 # displacement_setup['Ref_composition']['2'] = 0.1
@@ -51,13 +52,13 @@ component_cost_database = 'costDB_fiction.xls'
 
 # -----------------------------------------------------------------------------
 # Running multiple "K" values in merit function
-#KVEC = [-2.0, -1.5, -1.0,-0.5, 0.5,  1.0, 1.5,2.0,2.5,3.0,3.5,4.0] #-vector
-KVEC = [-2.0, 0.5,  1.0] #-vector
+# KVEC = [-2.0, -1.5, -1.0,-0.5, 0.5,  1.0, 1.5,2.0,2.5,3.0,3.5,4.0] #-vector
+KVEC = [-2.0, 0.5,  1.0]  # -vector
 
 
 # -----------------------------------------------------------------------------
 # Property bounds - these can be omitted to have no bound
-# NOT YET IMPLEMENTED 
+# NOT YET IMPLEMENTED
 # property_min['RON'] = 87.0
 # property_min['ON'] = 87.0
 # property_min['S'] = 36.0
@@ -65,7 +66,7 @@ KVEC = [-2.0, 0.5,  1.0] #-vector
 # property_min['SL'] = 36.0
 # property_min['LFV150'] = 0.0
 # property_min['PMI'] = 0.0
-# 
+#
 # property_max['RON'] = 87.0
 # property_max['ON'] = 87.0
 # property_max['S'] = 0.0
@@ -80,4 +81,3 @@ KVEC = [-2.0, 0.5,  1.0] #-vector
 # component_min['3'] = 0.7
 # component_max['2'] = 0.1
 # -----------------------------------------------------------------------------
-

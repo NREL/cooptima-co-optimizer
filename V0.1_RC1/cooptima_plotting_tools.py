@@ -1,5 +1,3 @@
-__author__ = 'rgrout'
-
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -8,6 +6,9 @@ from matplotlib.projections import register_projection
 from matplotlib.path import Path
 from matplotlib.spines import Spine
 import matplotlib.ticker as ticker
+
+__author__ = 'rgrout'
+
 
 # Follow pattern from matplotlib example
 def radar_factory(num_vars, frame='circle'):
@@ -22,9 +23,9 @@ def radar_factory(num_vars, frame='circle'):
         return plt.Polygon(verts, closed=True, edgecolor='k')
 
     def draw_circle_patch(self):
-        return plt.Circle((0.5,0.5),0.5)
+        return plt.Circle((0.5, 0.5), 0.5)
 
-    patch_dict = {'polygon':draw_poly_patch, 'circle':draw_circle_patch}
+    patch_dict = {'polygon': draw_poly_patch, 'circle': draw_circle_patch}
     if frame not in patch_dict:
         raise ValueError('unknown value for `frame`: %s' % frame)
 
@@ -34,9 +35,9 @@ def radar_factory(num_vars, frame='circle'):
         draw_patch = patch_dict[frame]
 
         def fill(self, *args, **kwargs):
-             """Override fill so that line is closed by default"""
-             closed = kwargs.pop('closed', True)
-             return super(RadarAxes, self).fill(closed=closed, *args, **kwargs)
+            """Override fill so that line is closed by default"""
+            closed = kwargs.pop('closed', True)
+            return super(RadarAxes, self).fill(closed=closed, *args, **kwargs)
 
         def plot(self, *args, **kwargs):
             """Override plot so that line is closed by default"""
@@ -77,7 +78,8 @@ def radar_factory(num_vars, frame='circle'):
 
     register_projection(RadarAxes)
     return theta
-        
+
+
 def unit_poly_verts(theta):
     """Return vertices of polygon for subplot axes.
 
@@ -86,8 +88,6 @@ def unit_poly_verts(theta):
     x0, y0, r = [0.5] * 3
     verts = [(r*np.cos(t) + x0, r*np.sin(t) + y0) for t in theta]
     return verts
-        
-
 
 
 # Plot the composition using names from propDB as axis label on a radar plot
@@ -102,12 +102,12 @@ def plot_comp_radar(propDB, comp, title='Composition', savefile=None):
         spoke_lab.append(propDB[k]['NAME'])
         spoke_vals.append(comp[k])
 
-    fig = plt.figure(figsize=(9,9))
+    fig = plt.figure(figsize=(9, 9))
 
-    ax = fig.add_subplot(1,1,1,projection='radar')
+    ax = fig.add_subplot(1, 1, 1, projection='radar')
 
     ax.set_title(title, weight='bold', size='medium',
-                 position=(0.5,1.1),
+                 position=(0.5, 1.1),
                  horizontalalignment='center', verticalalignment='center')
     ax.plot(theta, spoke_vals)
     ax.fill(theta, spoke_vals, alpha=0.25)
@@ -118,17 +118,17 @@ def plot_comp_radar(propDB, comp, title='Composition', savefile=None):
     else:
         plt.show()
     plt.close()
-    
 
 
 def plot_prop_parallel(proplist):
-# Starting from http://stackoverflow.com/questions/8230638/parallel-coordinates-plot-in-matplotlib
+    # Starting from:
+    # http://stackoverflow.com/questions/8230638/parallel-coordinates-plot-in-matplotlib
     dims = len(proplist[0])
     x = range(dims)
 
     print proplist[0]
 
-    fig, axs = plt.subplots(1,dims-1, sharey=False)
+    fig, axs = plt.subplots(1, dims-1, sharey=False)
     style = ['r-']*len(proplist)
 
     min_per_prop = {}
@@ -139,9 +139,7 @@ def plot_prop_parallel(proplist):
         max_per_prop[p] = -1.0e20
         range_per_prop[p] = 0.0
     for prop in proplist:
-#        print "propset: ", prop
-        for p,v in prop.iteritems():
-#            print "prop", p, " = ", v
+        for p, v in prop.iteritems():
             mn = min(min_per_prop[p], v)
             mx = max(max_per_prop[p], v)
             r = float(mx-mn)
@@ -150,69 +148,58 @@ def plot_prop_parallel(proplist):
             range_per_prop[p] = r
 
 
-#Normalize
+# Normalize
     nondim_vals = {}
     # fix order of properties
     prop_order = proplist[0].keys()
     nd_list = []
 
     for prop in proplist:
-        nd_props= []
+        nd_props = []
         for p in prop_order:
-            print "normalizing: ", prop[p], " by min / range: ", min_per_prop[p], range_per_prop[p]
+            print "normalizing: ", prop[p], " by min / range: ",\
+                  min_per_prop[p], range_per_prop[p]
             if np.abs(range_per_prop[p]) > 0.0:
-                normval = ( (prop[p] - min_per_prop[p])/range_per_prop[p] )
+                normval = ((prop[p] - min_per_prop[p])/range_per_prop[p])
                 print "norm val = ", normval
-                nd_props.append( normval)
+                nd_props.append(normval)
             else:
-                nd_props.append( 0.5 )
+                nd_props.append(0.5)
         nd_list.append(nd_props)
 
-
-
 # Print on each axis line between normalized property values
-
     for i, ax in enumerate(axs):
         for prop_index, ndval in enumerate(nd_list):
             ax.plot(x, ndval, style[prop_index])
             ax.set_xlim([x[i], x[i+1]])
-    
+
 # Clean up the x lables
     i = 0
-    for ax, xx in zip (axs, x[:-1]):
+    for ax, xx in zip(axs, x[:-1]):
         ax.xaxis.set_major_locator(ticker.FixedLocator([xx]))
         ax.set_xticklabels([prop_order[i]])
         i += 1
-    axs[-1].xaxis.set_major_locator(ticker.FixedLocator([x[-2],x[-1]]))
+    axs[-1].xaxis.set_major_locator(ticker.FixedLocator([x[-2], x[-1]]))
     axs[-1].set_xticklabels(prop_order[-2:])
 
 # Clean up the y lables
     for ax, p in zip(axs, prop_order):
-        ax.yaxis.set_ticks([0,1])
+        ax.yaxis.set_ticks([0, 1])
         yminlab = "{:.1f}".format(min_per_prop[p])
         ymaxlab = "{:.1f}".format(max_per_prop[p])
         ax.set_yticklabels([yminlab, ymaxlab])
-        #ax.set_xticklabels([prop_order[i]])
-    axs[-1].yaxis.set_ticks([0,1])
+    axs[-1].yaxis.set_ticks([0, 1])
     for tick in axs[-1].yaxis.get_major_ticks():
-        tick.label20n=True
+        tick.label20n = True
     yminlab = "{:.1f}".format(min_per_prop[prop_order[-1]])
     ymaxlab = "{:.1f}".format(max_per_prop[prop_order[-1]])
     axs[-1].set_yticklabels([yminlab, ymaxlab])
-                         
+
 # Stack subplots together
     plt.subplots_adjust(wspace=0.0)
 
     plt.show()
 
 
-#TODO: spring plot also to show results. Color by goodness value (also color
-#                                                                 series on
-#                                                                 parallel
-#                                                                 coordinates by
-#                                                                 goodness
-#                                                                 values)
-
-
-
-
+# TODO: spring plot also to show results. Color by goodness value
+# (also color series on parallel coordinates by goodness values)
