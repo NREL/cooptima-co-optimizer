@@ -13,8 +13,12 @@ component_max = {}
 # -----------------------------------------------------------------------------
 # What the co-optimizer should do
 
-# Run a tradeoff analysis between cost and merit function
-task_list['cost_vs_merit_Pareto'] = True
+# Run a tradeoff analysis between cost and obtainable merit function
+task_list['cost_vs_merit_Pareto'] = False
+
+
+# Run a tradeoff analysis between engine design and obtainable merit function
+task_list['K_vs_merit_sweep'] = True
 
 # Find the composition that maximizes the merit function subject to constraints
 # below - NOT YET IMPLEMENTED,  PLACEHOLDER FOR FUTURE DEV
@@ -57,26 +61,7 @@ KVEC = [-2.0, 0.5,  1.0]  # -vector
 
 
 # -----------------------------------------------------------------------------
-# Property bounds - these can be omitted to have no bound
-# NOT YET IMPLEMENTED
-# property_min['RON'] = 87.0
-# property_min['ON'] = 87.0
-# property_min['S'] = 36.0
-# #property_min['HoV'] = 0.0
-# property_min['SL'] = 36.0
-# property_min['LFV150'] = 0.0
-# property_min['PMI'] = 0.0
-#
-# property_max['RON'] = 87.0
-# property_max['ON'] = 87.0
-# property_max['S'] = 0.0
-# #property_max['HoV'] = 100.0
-# property_max['SL'] = 36.0
-# property_max['LFV150'] = 0.0
-# property_max['PMI'] = 0.0
-
-# -----------------------------------------------------------------------------
-# Constraints on minimum/maximum volume fraction of a given component
+# Constraints on minimum/maximum mole fraction of a given component
 # NOT YET IMPLEMENTED
 # component_min['3'] = 0.7
 # component_max['2'] = 0.1
