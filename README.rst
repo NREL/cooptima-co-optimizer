@@ -64,6 +64,9 @@ or
 
 in the input file `cooptimizer_input.py`. Note that as of this release, only the former is implemented in the GA formulation.
 
+The co-optimizer is run by
+```python co_optimizer.py ```
+
 
 Methodology
 -----------
