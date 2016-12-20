@@ -43,7 +43,7 @@ Input files
 - Properties database input file (example: propDB_fiction.xls)
 - Cost input file (example: costDB_fiction.xls)
 
-There are tools included in this distribution to read a file output from the _fuel properties database_; however, since at the moment the properties necessary for the merit function largely need to be filled in by the user, they are not used. Instead, it is left to the user to fill in components and properties in the template files "propDB.xls" and "costDB.xls". The names are arbitrary and are specified in the cooptimizer_input.py file.
+There are tools included in this distribution to read a file output from the *fuel properties database*; however, since at the moment the properties necessary for the merit function largely need to be filled in by the user, they are not used. Instead, it is left to the user to fill in components and properties in the template files "propDB.xls" and "costDB.xls". The names are arbitrary and are specified in the cooptimizer_input.py file.
 
 
 
@@ -54,18 +54,23 @@ This release is capable of 2 primary capabilities.
 
 1. Firstly, sweeping out a Pareto front to study the cost-merit trade off; that is, finding the composition that maximizes
 merit for a given cost (or, equivalently, finding the composition that minimizes cost for a given merit).
+
 2. Sweeping across a range of values of "K" in the merit function and finding the composition that maximizes the merit function 
 irrespective of cost (or for no data available)
 
-The mode is selected by setting either 
-``` task_list['cost_vs_merit_Pareto'] = True ``` 
-or
-``` task_list['K_vs_merit_sweep'] = True ```
+The mode is selected by setting either::
+
+task_list['cost_vs_merit_Pareto'] = True
+
+or::
+
+task_list['K_vs_merit_sweep'] = True
 
 in the input file `cooptimizer_input.py`. Note that as of this release, only the former is implemented in the GA formulation.
 
-The co-optimizer is run by
-```python co_optimizer.py ```
+The co-optimizer is run by::
+
+python co_optimizer.py
 
 
 Methodology
