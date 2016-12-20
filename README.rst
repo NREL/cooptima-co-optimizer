@@ -80,6 +80,8 @@ currently uses IPOPT for solving the non-linear interior point optimization prob
 co-optimizer will attempt some heuristics to obtain a successful solution; if this is not possible, it will display an error message. There is also a 'deap_NSGAII'
 option, which will use the DEAP toolbox implementation of the NSGA2 (Non Sorting Genetic Algorithm II) to find the Pareto front. This method is more robust, but can take longer. 
 
-
+Acknowledgement
+---------------
+The co-optimizer was developed as part of the Co-Optimization of Fuels & Engines (Co-Optima) project sponsored by the U.S. Department of Energy (DOE) Office of Energy Efficiency and Renewable Energy (EERE), Bioenergy Technologies and Vehicle Technologies Offices. (Optional): Co-Optima is a collaborative project of multiple national laboratories initiated to simultaneously accelerate the introduction of affordable, scalable, and sustainable biofuels and high-efficiency, low-emission vehicle engines.
 
 

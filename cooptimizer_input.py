@@ -1,3 +1,25 @@
+# -*- coding: utf-8; -*-
+"""cooptimizer_input.py: Input / configuration file for the co-optimizer
+--------------------------------------------------------------------------------
+Developed by the NREL Computational Science Center
+and LBNL Center for Computational Science and Engineering
+Contact: Ray Grout <ray.grout@nrel.gov>
+
+Authors: Ray Grout and Juliane Mueller
+--------------------------------------------------------------------------------
+
+
+This file is part of the Co-optimizer, developed as part of the Co-Optimization
+of Fuels & Engines (Co-Optima) project sponsored by the U.S. Department of 
+Energy (DOE) Office of Energy Efficiency and Renewable Energy (EERE), Bioenergy 
+Technologies and Vehicle Technologies Offices. (Optional): Co-Optima is a 
+collaborative project of multiple national laboratories initiated to 
+simultaneously accelerate the introduction of affordable, scalable, and 
+sustainable biofuels and high-efficiency, low-emission vehicle engines.
+
+"""
+
+
 task_list = {}
 displacement_setup = {}
 property_min = {}
@@ -18,7 +40,7 @@ task_list['cost_vs_merit_Pareto'] = True
 
 
 # Run a tradeoff analysis between engine design and obtainable merit function
-task_list['K_vs_merit_sweep'] = True
+task_list['K_vs_merit_sweep'] = False
 
 # Find the composition that maximizes the merit function subject to constraints
 # below - NOT YET IMPLEMENTED,  PLACEHOLDER FOR FUTURE DEV

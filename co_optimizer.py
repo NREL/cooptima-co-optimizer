@@ -1,11 +1,23 @@
-# This file is part of the 'co-optimizer' for the Co-optimization of fuels
-# and engine project
+# -*- coding: utf-8; -*-
+"""co_optimizer.py: Driver code for the co_optimizer
+--------------------------------------------------------------------------------
+Developed by the NREL Computational Science Center
+and LBNL Center for Computational Science and Engineering
+Contact: Ray Grout <ray.grout@nrel.gov>
 
-# Authors:
-# Ray Grout (ray.grout@nrel.gov) and Juliane Muller (julianemueller@lbl.gov)
+Authors: Ray Grout and Juliane Mueller
+--------------------------------------------------------------------------------
 
-# Created with the support of the DOE/EERE/VTO fuels and lubricants program
-# Program Manager Kevin Stork
+
+This file is part of the Co-optimizer, developed as part of the Co-Optimization
+of Fuels & Engines (Co-Optima) project sponsored by the U.S. Department of 
+Energy (DOE) Office of Energy Efficiency and Renewable Energy (EERE), Bioenergy 
+Technologies and Vehicle Technologies Offices. (Optional): Co-Optima is a 
+collaborative project of multiple national laboratories initiated to 
+simultaneously accelerate the introduction of affordable, scalable, and 
+sustainable biofuels and high-efficiency, low-emission vehicle engines.
+
+"""
 
 from __future__ import print_function
 import sys

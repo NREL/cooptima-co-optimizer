@@ -1,3 +1,27 @@
+# -*- coding: utf-8; -*-
+"""optimizer.py: PYOMO based approach to cost-merit Pareto front identification 
+properties database and also simplified spreadsheets based on the list of 20
+or similar downselects
+--------------------------------------------------------------------------------
+Developed by the NREL Computational Science Center
+and LBNL Center for Computational Science and Engineering
+Contact: Ray Grout <ray.grout@nrel.gov>
+
+Authors: Ray Grout and Juliane Mueller
+--------------------------------------------------------------------------------
+
+
+This file is part of the Co-optimizer, developed as part of the Co-Optimization
+of Fuels & Engines (Co-Optima) project sponsored by the U.S. Department of 
+Energy (DOE) Office of Energy Efficiency and Renewable Energy (EERE), Bioenergy 
+Technologies and Vehicle Technologies Offices. (Optional): Co-Optima is a 
+collaborative project of multiple national laboratories initiated to 
+simultaneously accelerate the introduction of affordable, scalable, and 
+sustainable biofuels and high-efficiency, low-emission vehicle engines.
+
+"""
+
+
 import numpy as np
 import cooptima_plotting_tools as cpt
 from merit_functions import mmf_single

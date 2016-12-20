@@ -1,17 +1,30 @@
-#    This file is part of DEAP.
-#
-#    DEAP is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Lesser General Public License as
-#    published by the Free Software Foundation, either version 3 of
-#    the License, or (at your option) any later version.
-#
-#    DEAP is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#    GNU Lesser General Public License for more details.
-#
-#    You should have received a copy of the GNU Lesser General Public
-#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
+# -*- coding: utf-8; -*-
+"""nsga2_k.py: GA based approach to cost-merit Pareto front identification 
+--------------------------------------------------------------------------------
+Developed by the NREL Computational Science Center
+and LBNL Center for Computational Science and Engineering
+Contact: Ray Grout <ray.grout@nrel.gov>
+
+Authors: Ray Grout and Juliane Mueller
+
+N.B.: This approach inspired by the example supplied with DEAP, which 
+is licensed under the GNU Lesser General Public License. Since nothing
+from DEAP is statically linked to the co-optimizer this should not be 
+an infectious license, but eventually we may need to re-implement this 
+capability in such a way that we do not infringe on the DEAP license terms.
+
+--------------------------------------------------------------------------------
+
+
+This file is part of the Co-optimizer, developed as part of the Co-Optimization
+of Fuels & Engines (Co-Optima) project sponsored by the U.S. Department of 
+Energy (DOE) Office of Energy Efficiency and Renewable Energy (EERE), Bioenergy 
+Technologies and Vehicle Technologies Offices. (Optional): Co-Optima is a 
+collaborative project of multiple national laboratories initiated to 
+simultaneously accelerate the introduction of affordable, scalable, and 
+sustainable biofuels and high-efficiency, low-emission vehicle engines.
+
+"""
 
 import array
 import random
