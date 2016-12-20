@@ -29,12 +29,12 @@ Prerequisites
 -------------
 
 - python
-- numpy
-- matplotlib
-- pyomo 
-- ipopt
-- deap / nsga2
-- xlrd
+- `Numpy <http://www.numpy.org>`_
+- `Matplotlib <http://matplotlib.org>`_
+- `PYOMO <http://www.pyomo.org>`_
+- `IPOPT <https://projects.coin-or.org/Ipopt>`_
+- deap / nsga2 (`Installation guide` <http://deap.readthedocs.io/en/master/installation.html>`_) 
+- `xlrd <http://www.python-excel.org>`_
 
 Input files
 ------------
