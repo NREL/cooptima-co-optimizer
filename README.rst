@@ -34,7 +34,31 @@ Prerequisites
 - `PYOMO <http://www.pyomo.org>`_
 - `IPOPT <https://projects.coin-or.org/Ipopt>`_
 - deap / nsga2 (`Installation guide <http://deap.readthedocs.io/en/master/installation.html>`_) 
-- `xlrd <http://www.python-excel.org>`_
+- `xlrd and xlwt <http://www.python-excel.org>`_
+
+
+Setting up to run on Peregrine
+------------------------------
+
+The co-optimizer is set up and installed on Peregrine 
+in /projects/optima/applications/co-optimizer. To set up your environment to run 
+the co-optimizer on Peregine, a few modules are necessary::
+
+module load python
+module load mkl
+
+Then you can use pip to install the prerequisite python tools in your 
+home directory::
+
+pip install --user pyomo
+pip install --user xlrd
+pip install --user xlwt
+pip install --user deap
+
+Finally, to use the pre-build ipopt executable you need to add to your path::
+
+export PATH=$PATH:/projects/optima/applications/co-optimizer/utils/ipopt/bin
+
 
 Input files
 ------------
