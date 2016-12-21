@@ -21,12 +21,14 @@ sustainable biofuels and high-efficiency, low-emission vehicle engines.
 
 from __future__ import print_function
 import sys
+import matplotlib as mpl
+mpl.use('Agg')
+import matplotlib.pyplot as plt
 from fuelsdb_interface import load_propDB, make_property_vector
 from optimizer import run_optimize_vs_C as run_optimize_pyomo_C,\
                       comp_to_cost_mmf, comp_to_mmf,\
                       run_optimize_vs_K as run_optimize_pyomo_K
 from nsga2_k import nsga2_pareto_K as run_optmize_nsga2
-import matplotlib.pyplot as plt
 import numpy as np
 import cooptimizer_input
 clr = ['fuchsia', 'b', 'g', 'r', 'y', 'm', 'c', 'k', 'g', 'r', 'y', 'm']
