@@ -35,6 +35,26 @@ def mmf_single(RON=100.0, S=10.0, ON=90.0, HoV=415.0, SL=46.0,
                 (SL - 46.0)/3.0 -
                 LFV150)
 
+def mmf_single_param(ref,sen,RON=100.0, S=10.0, ON=90.0, HoV=415.0, SL=46.0,
+                     LFV150=0.0, PMI=1.0, K=0.5):
+
+
+    if PMI > ref['PMI']:
+        return ((RON-ref['RON'])*sen['ON'] -
+                (K * (S-ref['S'])*sen['ON']) +
+                (sen['ONHoV']*ON*(HoV-ref['HoV']))*sen['ON'] +
+                (HoV - ref['HoV'])*sen['HoV'] +
+                (SL - ref['SL'])*sen['SL'] -
+                LFV150*sen['LFV150'] - 
+                (sen['PMIFIX']+sen['PMIVAR']*(PMI-ref['PMI'])))
+    else:
+        return ((RON-ref['RON'])*sen['ON'] -
+                (K * (S-ref['S'])*sen['ON']) +
+                (sen['ONHoV']*ON*(HoV-ref['HoV']))*sen['ON'] +
+                (HoV - ref['HoV'])*sen['HoV'] +
+                (SL - ref['SL'])*sen['SL'] -
+                LFV150*sen['LFV150'] )
+
 
 def rand_composition(propDB):
     comp = {}
