@@ -31,6 +31,7 @@ from optimizer import run_optimize_vs_C as run_optimize_pyomo_C,\
 from nsga2_k import nsga2_pareto_K as run_optmize_nsga2
 import numpy as np
 import cooptimizer_input
+from matplotlib.backends.backend_pdf import PdfPages
 clr = ['fuchsia', 'b', 'g', 'r', 'y', 'm', 'c', 'k', 'g', 'r', 'y', 'm']
 mrk = ['o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'x', 'x', 'x', 'x', 'x']
 
@@ -160,7 +161,219 @@ if __name__ == '__main__':
         plt.savefig(cooptimizer_input.k_sweep_plotfilename, form='pdf')
         output_files.append(cooptimizer_input.k_sweep_plotfilename)
         output_files.append(cooptimizer_input.k_sweep_datafilename)
+    if cooptimizer_input.task_list['K_sampling']:
+        plt.close()
+        compfile = open(cooptimizer_input.k_sampling_datafilename, 'w')
+        print ("Running K vs merit function sweep")
+        n = cooptimizer_input.nsamples
+        
+        ncomp, spc_names, propvec = make_property_vector(propDB)
 
+        if cooptimizer_input.use_pyomo and cooptimizer_input.use_deap_NSGAII:
+            print("Choose only 1 optimizer method")
+            print("(not use_pyomo and use_deap_NSGAII)!")
+            sys.exit(-2)
+
+        if cooptimizer_input.use_deap_NSGAII:
+            print("Not yet implemented using NSGAII")
+            sys.exit(-1)
+
+        M = []
+        KVEC = []
+        KVEC = np.random.normal(cooptimizer_input.kmean,cooptimizer_input.kvar,n)
+        for ii in range(n):
+            KK = KVEC[ii]
+            if cooptimizer_input.use_pyomo:
+                comp, isok = run_optimize_pyomo_K(KK, propDB)
+                if (isok):
+                    write_composition(compfile, comp)
+                    compfile.write("\n")
+                    m = comp_to_mmf(comp, propDB, KK)
+                    M.append(m)
+                    print ("sample m = {}".format(m))
+            elif cooptimizer_input.use_deap_NSGAII:
+                C, M = run_optmize_nsga2(KK, propvec)
+            else:
+                print("No valid optimization algorithm specified")
+                sys.exit(-1)
+        print ("{}".format(cooptimizer_input.KVEC))
+        print ("{}".format(M))  
+        f, axs = plt.subplots(1,2)
+        axs[0].hist(M,bins=max(20,n/100))
+        axs[0].set_xlabel('Maximum Merit distribuiton')
+
+        axs[1].hist(KVEC,bins=max(20,n/100))
+        axs[1].set_xlabel('K input distribution')
+      
+        plt.savefig(cooptimizer_input.k_sampling_plotfilename, form='pdf')
+        output_files.append(cooptimizer_input.k_sampling_plotfilename)
+        output_files.append(cooptimizer_input.k_sampling_datafilename)
+    
+    if cooptimizer_input.task_list['UP']:
+        plt.close()
+        compfile = open(cooptimizer_input.UP_datafilename, 'w')
+        print ("Running uncertainty propagation")
+        n = cooptimizer_input.nsamples
+        
+        ncomp, spc_names, propvec = make_property_vector(propDB)
+
+        if cooptimizer_input.use_pyomo and cooptimizer_input.use_deap_NSGAII:
+            print("Choose only 1 optimizer method")
+            print("(not use_pyomo and use_deap_NSGAII)!")
+            sys.exit(-2)
+
+        if cooptimizer_input.use_deap_NSGAII:
+            print("Not yet implemented using NSGAII")
+            sys.exit(-1)
+
+        KK = cooptimizer_input.KVEC[0]
+        M = []
+
+        
+             
+        sen_mean = {}
+        sen_mean['ON']= 1.0/1.6
+        sen_mean['ONHoV'] = 0.01
+        sen_mean['HoV'] = 1.0/130.0
+        sen_mean['SL'] = 1.0/3.0
+        sen_mean['LFV150'] = 1.0
+        sen_mean['PMIFIX'] = 0.67
+        sen_mean['PMIVAR'] = 0.5
+        
+        sen_var = {}
+        sen_var['ON']= 1.0/1.6*.1
+        sen_var['ONHoV'] = 0.01*.1
+        sen_var['HoV'] = 1.0/130.0*.1
+        sen_var['SL'] = 1.0/3.0*.1
+        sen_var['LFV150'] = 0.1
+        sen_var['PMIFIX'] = 0.67*.1
+        sen_var['PMIVAR'] = 0.5*.1
+
+        ref_mean = {}
+        ref_mean['RON'] = 92.0
+        ref_mean['S'] = 10.0
+        ref_mean['HoV'] = 415.0
+        ref_mean['SL'] = 46.0
+        ref_mean['PMI'] = 2.0
+        
+        # This such that it looks more like certification fuel
+        ref_var = {}
+        ref_var['RON'] = 8.0
+        ref_var['S'] = 10.0
+        ref_var['HoV'] = 20.0
+        ref_var['SL'] = 2.0
+        ref_var['PMI'] = 2.0
+
+        sen_samples = {}
+        ref_samples = {}
+        for kk in sen_mean.keys():
+            sen_samples[kk] = []
+        for kk in ref_mean.keys():
+            ref_samples[kk] = []
+
+        nn = 0
+        sen = {}
+        ref = {}
+        while nn < n:
+            # Draw a sample candidate
+            for kk in sen_mean.keys():
+                sen[kk] = np.random.normal(sen_mean[kk],sen_var[kk])
+            for kk in ref_mean.keys():
+                ref[kk] = np.random.normal(ref_mean[kk],ref_var[kk])
+
+            # Reject samples outside bounds
+            if ref['PMI'] < 0.0:
+                continue 
+            if ref['S'] < 0.0:
+                continue  
+            nn += 1
+
+            # If we're good, sotre it and then go on to evaluation
+            for kk in sen_mean.keys():
+                sen_samples[kk].append(sen[kk])
+            for kk in ref_mean.keys():
+                ref_samples[kk].append(ref[kk])
+
+
+            if cooptimizer_input.use_pyomo:
+                comp, isok = run_optimize_pyomo_K(KK, propDB, ref=ref, sen=sen)
+                if (isok):
+                    write_composition(compfile, comp)
+                    compfile.write("\n")
+                    m = comp_to_mmf(comp, propDB, KK,ref=ref,sen=sen)
+                    M.append(m)
+                    print ("sample m = {}".format(m))
+            elif cooptimizer_input.use_deap_NSGAII:
+                C, M = run_optmize_nsga2(KK, propvec)
+            else:
+                print("No valid optimization algorithm specified")
+                sys.exit(-1)
+        print ("{}".format(cooptimizer_input.KVEC))
+        print ("{}".format(M))  
+        with PdfPages(cooptimizer_input.UP_plotfilename) as pdf:
+            f, ax = plt.subplots(1,1)
+            ax.hist(M,bins=max(20,n/100))
+            ax.set_xlabel('Maximum Merit distribuiton')
+            pdf.savefig()
+            plt.close()
+            f, axs = plt.subplots(2,4)
+            axs[0,0].hist(sen_samples['ON'],alpha=0.4)
+            axs[0,0].set_xlabel('ON')
+            axs[0,0].locator_params(nbins=4, axis='x')
+            
+            axs[0,1].hist(sen_samples['ONHoV'],alpha=0.4)
+            axs[0,1].set_xlabel('ONHoV')
+            axs[0,1].locator_params(nbins=2, axis='x')
+            
+            axs[0,2].hist(sen_samples['HoV'],alpha=0.4)
+            axs[0,2].set_xlabel('HoV')
+            axs[0,2].locator_params(nbins=2, axis='x')
+
+            axs[0,3].hist(sen_samples['SL'],alpha=0.4)
+            axs[0,3].set_xlabel('SL')
+            axs[0,3].locator_params(nbins=4, axis='x')
+
+            axs[1,0].hist(sen_samples['LFV150'],alpha=0.4)
+            axs[1,0].set_xlabel('LFV150')
+            axs[1,0].locator_params(nbins=4, axis='x')
+
+            axs[1,1].hist(sen_samples['PMIFIX'],alpha=0.4)
+            axs[1,1].set_xlabel('PMIFIX')
+            axs[1,1].locator_params(nbins=4, axis='x')
+            
+            axs[1,2].hist(sen_samples['PMIVAR'],alpha=0.4)
+            axs[1,2].set_xlabel('PMIVAR')
+            axs[1,2].locator_params(nbins=4, axis='x')
+            plt.tight_layout()
+            pdf.savefig()
+            plt.close()
+
+            f, axs = plt.subplots(2,3)
+            axs[0,0].hist(ref_samples['RON'])
+            axs[0,0].set_xlabel('Research Octane')
+            axs[0,0].locator_params(nbins=4, axis='x')
+
+            axs[0,1].hist(ref_samples['S'])
+            axs[0,1].set_xlabel('Sensitivity')
+            axs[0,1].locator_params(nbins=4, axis='x')
+
+            axs[0,2].hist(ref_samples['HoV'])
+            axs[0,2].set_xlabel('Heat of Vaporization')
+            axs[0,2].locator_params(nbins=4, axis='x')
+
+            axs[1,0].hist(ref_samples['SL'])
+            axs[1,0].set_xlabel('Laminar Flame Speed')
+            axs[1,0].locator_params(nbins=4, axis='x')
+
+            axs[1,1].hist(ref_samples['PMI'])
+            axs[1,1].set_xlabel('Particulate Matter Index')
+            axs[1,1].locator_params(nbins=4, axis='x')
+            plt.tight_layout()
+            pdf.savefig()
+            plt.close()
+
+        output_files.append(cooptimizer_input.UP_plotfilename)
+        output_files.append(cooptimizer_input.UP_datafilename)
     print("==================================================================")
     print("Analysis completed; new output files")
     for f in output_files:

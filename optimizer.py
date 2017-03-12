@@ -24,13 +24,14 @@ sustainable biofuels and high-efficiency, low-emission vehicle engines.
 
 import numpy as np
 import cooptima_plotting_tools as cpt
-from merit_functions import mmf_single
+from merit_functions import mmf_single, mmf_single_param
 from blend_functions import blend_linear_propDB as blend_linear_propDB
 from blend_functions import blend_linear_pyomo as blend_linear_pyomo
 from pyomo.environ import *
 from pyomo.opt import SolverFactory, SolverStatus, TerminationCondition
 import pyomo.environ
 import matplotlib.pyplot as plt
+import sys
 
 from fuelsdb_interface import make_property_dict
 
@@ -145,9 +146,16 @@ def run_optimize_vs_C(cstar, KK, propDB, initial_X=None):
         return comp, isok
 
 
-def run_optimize_vs_K(KK, propDB, initial_X=None):
+def run_optimize_vs_K(KK, propDB, initial_X=None,ref=None,sen=None):
         print("Running optimizer based on IPOPT for KK={}".format(KK))
         ncomp, spc_names, propvec = make_property_dict(propDB)
+
+        if ref is not None and sen is None:
+            print("Error; must spec both ref and sen, or neither")
+            sys.exit(-3)
+        if sen is not None and ref is None:
+            print("Error; must spec both ref and sen, or neither")
+            sys.exit(-4)
 
         def obj_fun(model):
             this_ron = blend_linear_pyomo(model, 'RON')
@@ -157,8 +165,12 @@ def run_optimize_vs_K(KK, propDB, initial_X=None):
             this_SL = blend_linear_pyomo(model, 'SL')
             this_LFV150 = blend_linear_pyomo(model, 'LFV150')
             this_PMI = blend_linear_pyomo(model, 'PMI')
-            return mmf_single(RON=this_ron, S=this_s, ON=this_on, HoV=this_HoV,
-                              SL=this_SL, K=KK)
+            if( ref is None):
+                return mmf_single(RON=this_ron, S=this_s, ON=this_on, HoV=this_HoV,
+                                  SL=this_SL, K=KK)
+            else:
+                return mmf_single_param(ref,sen, RON=this_ron, S=this_s, ON=this_on, HoV=this_HoV,
+                                        SL=this_SL, K=KK)
 
         def fraction_constraint(model):
             # Need fractions to sum to unity
@@ -266,16 +278,21 @@ def comp_to_cost_mmf(comp, propDB, k):
         return cost, mmf
 
 
-def comp_to_mmf(comp, propDB, k):
+def comp_to_mmf(comp, propDB, k,ref=None,sen=None):
         # Evaluate resulting mmf value
         # print comp
         prop_list = ['RON', 'S', 'ON', 'HoV', 'SL', 'LFV150', 'PMI']
         props = {}
         for p in prop_list:
             props[p] = blend_linear_propDB(p, propDB, comp)
-        mmf = mmf_single(RON=props['RON'], S=props['S'], ON=props['ON'],
-                         HoV=props['HoV'], SL=props['SL'],
-                         LFV150=props['LFV150'], PMI=props['PMI'], K=k)
+        if ref is None and sen is None:
+            mmf = mmf_single(RON=props['RON'], S=props['S'], ON=props['ON'],
+                             HoV=props['HoV'], SL=props['SL'],
+                             LFV150=props['LFV150'], PMI=props['PMI'], K=k)
+        else:   
+            mmf = mmf_single_param(ref,sen,RON=props['RON'], S=props['S'], ON=props['ON'],
+                                   HoV=props['HoV'], SL=props['SL'],
+                                   LFV150=props['LFV150'], PMI=props['PMI'], K=k)
         cost = blend_linear_propDB('COST', propDB, comp)
 
         return mmf

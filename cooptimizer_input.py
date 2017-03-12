@@ -36,12 +36,23 @@ component_max = {}
 # What the co-optimizer should do
 
 # Run a tradeoff analysis between cost and obtainable merit function
-task_list['cost_vs_merit_Pareto'] = True
+task_list['cost_vs_merit_Pareto'] = False
 
 
 # Run a tradeoff analysis between engine design and obtainable merit function
 task_list['K_vs_merit_sweep'] = False
 
+# Do sampling for various uncertain parameters
+task_list['K_sampling'] = False
+k_sampling_datafilename = 'k_sampling.txt'
+k_sampling_plotfilename = 'k_sampling.pdf'
+nsamples = 200
+kmean = 0.5
+kvar = 1.0
+
+task_list['UP'] = True
+UP_datafilename = 'UP.txt'
+UP_plotfilename = 'UP.pdf'
 # Find the composition that maximizes the merit function subject to constraints
 # below - NOT YET IMPLEMENTED,  PLACEHOLDER FOR FUTURE DEV
 # task_list['maximize_merit'] = False
