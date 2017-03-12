@@ -50,9 +50,45 @@ nsamples = 200
 kmean = 0.5
 kvar = 1.0
 
+# Do uncertainity propagation for uncertainty in merit function
 task_list['UP'] = True
 UP_datafilename = 'UP.txt'
 UP_plotfilename = 'UP.pdf'
+
+# Coefficients in merit function indicating potential improvement
+sen_mean = {}
+sen_mean['ON']= 1.0/1.6
+sen_mean['ONHoV'] = 0.01
+sen_mean['HoV'] = 1.0/130.0
+sen_mean['SL'] = 1.0/3.0
+sen_mean['LFV150'] = 1.0
+sen_mean['PMIFIX'] = 0.67
+sen_mean['PMIVAR'] = 0.5
+
+sen_var = {}
+sen_var['ON']= 1.0/1.6*.1
+sen_var['ONHoV'] = 0.01*.1
+sen_var['HoV'] = 1.0/130.0*.1
+sen_var['SL'] = 1.0/3.0*.1
+sen_var['LFV150'] = 0.1
+sen_var['PMIFIX'] = 0.67*.1
+sen_var['PMIVAR'] = 0.5*.1
+
+# Coefficients in merit function indicating reference fuel properties
+ref_mean = {}
+ref_mean['RON'] = 92.0
+ref_mean['S'] = 10.0
+ref_mean['HoV'] = 415.0
+ref_mean['SL'] = 46.0
+ref_mean['PMI'] = 2.0
+
+ref_var = {}
+ref_var['RON'] = 8.0
+ref_var['S'] = 10.0
+ref_var['HoV'] = 20.0
+ref_var['SL'] = 2.0
+ref_var['PMI'] = 2.0
+
 # Find the composition that maximizes the merit function subject to constraints
 # below - NOT YET IMPLEMENTED,  PLACEHOLDER FOR FUTURE DEV
 # task_list['maximize_merit'] = False

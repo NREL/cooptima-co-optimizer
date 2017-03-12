@@ -229,46 +229,11 @@ if __name__ == '__main__':
         KK = cooptimizer_input.KVEC[0]
         M = []
 
-        
-             
-        sen_mean = {}
-        sen_mean['ON']= 1.0/1.6
-        sen_mean['ONHoV'] = 0.01
-        sen_mean['HoV'] = 1.0/130.0
-        sen_mean['SL'] = 1.0/3.0
-        sen_mean['LFV150'] = 1.0
-        sen_mean['PMIFIX'] = 0.67
-        sen_mean['PMIVAR'] = 0.5
-        
-        sen_var = {}
-        sen_var['ON']= 1.0/1.6*.1
-        sen_var['ONHoV'] = 0.01*.1
-        sen_var['HoV'] = 1.0/130.0*.1
-        sen_var['SL'] = 1.0/3.0*.1
-        sen_var['LFV150'] = 0.1
-        sen_var['PMIFIX'] = 0.67*.1
-        sen_var['PMIVAR'] = 0.5*.1
-
-        ref_mean = {}
-        ref_mean['RON'] = 92.0
-        ref_mean['S'] = 10.0
-        ref_mean['HoV'] = 415.0
-        ref_mean['SL'] = 46.0
-        ref_mean['PMI'] = 2.0
-        
-        # This such that it looks more like certification fuel
-        ref_var = {}
-        ref_var['RON'] = 8.0
-        ref_var['S'] = 10.0
-        ref_var['HoV'] = 20.0
-        ref_var['SL'] = 2.0
-        ref_var['PMI'] = 2.0
-
         sen_samples = {}
         ref_samples = {}
-        for kk in sen_mean.keys():
+        for kk in cooptimizer_input.sen_mean.keys():
             sen_samples[kk] = []
-        for kk in ref_mean.keys():
+        for kk in cooptimizer_input.ref_mean.keys():
             ref_samples[kk] = []
 
         nn = 0
@@ -276,10 +241,10 @@ if __name__ == '__main__':
         ref = {}
         while nn < n:
             # Draw a sample candidate
-            for kk in sen_mean.keys():
-                sen[kk] = np.random.normal(sen_mean[kk],sen_var[kk])
-            for kk in ref_mean.keys():
-                ref[kk] = np.random.normal(ref_mean[kk],ref_var[kk])
+            for kk in cooptimizer_input.sen_mean.keys():
+                sen[kk] = np.random.normal(cooptimizer_input.sen_mean[kk],cooptimizer_input.sen_var[kk])
+            for kk in cooptimizer_input.ref_mean.keys():
+                ref[kk] = np.random.normal(cooptimizer_input.ref_mean[kk],cooptimizer_input.ref_var[kk])
 
             # Reject samples outside bounds
             if ref['PMI'] < 0.0:
@@ -289,9 +254,9 @@ if __name__ == '__main__':
             nn += 1
 
             # If we're good, sotre it and then go on to evaluation
-            for kk in sen_mean.keys():
+            for kk in cooptimizer_input.sen_mean.keys():
                 sen_samples[kk].append(sen[kk])
-            for kk in ref_mean.keys():
+            for kk in cooptimizer_input.ref_mean.keys():
                 ref_samples[kk].append(ref[kk])
 
 
