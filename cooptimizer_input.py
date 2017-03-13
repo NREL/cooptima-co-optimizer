@@ -36,7 +36,10 @@ component_max = {}
 # What the co-optimizer should do
 
 # Run a tradeoff analysis between cost and obtainable merit function
-task_list['cost_vs_merit_Pareto'] = False
+task_list['cost_vs_merit_Pareto'] = True
+
+#TODO: work out how to get distribution of merit possible for a given target cost
+#      based on uncertainty in cost properties. Do by sampling. Then we can put in bin+-delta.
 
 
 # Run a tradeoff analysis between engine design and obtainable merit function
@@ -51,7 +54,7 @@ kmean = 0.5
 kvar = 1.0
 
 # Do uncertainity propagation for uncertainty in merit function
-task_list['UP'] = True
+task_list['UP'] = False
 UP_datafilename = 'UP.txt'
 UP_plotfilename = 'UP.pdf'
 
