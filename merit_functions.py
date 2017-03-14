@@ -18,31 +18,31 @@ simultaneously accelerate the introduction of affordable, scalable, and
 sustainable biofuels and high-efficiency, low-emission vehicle engines.
 
 """
-def mmf_single(RON=100.0, S=10.0, ON=90.0, HoV=415.0, SL=46.0,
+def mmf_single(RON=100.0, S=10.0, HoV=415.0, SL=46.0,
                LFV150=0.0, PMI=1.0, K=0.5):
     if PMI > 2.0:
         return ((RON-92.0)/1.6 -
                 (K * (S-10.0)/1.6) +
-                (0.01*ON*(HoV-415.0))/1.6 +
+                (0.01*(HoV-415.0))/1.6 +
                 (HoV - 415.0)/130.0 +
                 (SL - 46.0)/3.0 -
                 LFV150 - (0.67+0.5*(PMI-2.0)))
     else:
         return ((RON-92.0)/1.6 -
                 (K * (S-10.0)/1.6) +
-                (0.01*ON*(HoV-415.0))/1.6 +
+                (0.01*(HoV-415.0))/1.6 +
                 (HoV - 415.0)/130.0 +
                 (SL - 46.0)/3.0 -
                 LFV150)
 
-def mmf_single_param(ref,sen,RON=100.0, S=10.0, ON=90.0, HoV=415.0, SL=46.0,
+def mmf_single_param(ref,sen,RON=100.0, S=10.0, HoV=415.0, SL=46.0,
                      LFV150=0.0, PMI=1.0, K=0.5):
 
 
     if PMI > ref['PMI']:
         return ((RON-ref['RON'])*sen['ON'] -
                 (K * (S-ref['S'])*sen['ON']) +
-                (sen['ONHoV']*ON*(HoV-ref['HoV']))*sen['ON'] +
+                (sen['ONHoV']*(HoV-ref['HoV']))*sen['ON'] +
                 (HoV - ref['HoV'])*sen['HoV'] +
                 (SL - ref['SL'])*sen['SL'] -
                 LFV150*sen['LFV150'] - 
@@ -50,7 +50,7 @@ def mmf_single_param(ref,sen,RON=100.0, S=10.0, ON=90.0, HoV=415.0, SL=46.0,
     else:
         return ((RON-ref['RON'])*sen['ON'] -
                 (K * (S-ref['S'])*sen['ON']) +
-                (sen['ONHoV']*ON*(HoV-ref['HoV']))*sen['ON'] +
+                (sen['ONHoV']*(HoV-ref['HoV']))*sen['ON'] +
                 (HoV - ref['HoV'])*sen['HoV'] +
                 (SL - ref['SL'])*sen['SL'] -
                 LFV150*sen['LFV150'] )

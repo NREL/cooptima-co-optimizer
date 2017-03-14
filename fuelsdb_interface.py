@@ -54,7 +54,6 @@ def make_property_vector(propDB):
     for i in range(0, ncomp):
         RONVEC[i] = (propDB[SPNM[i-1]]['RON'])
         SVEC[i] = (propDB[SPNM[i-1]]['S'])
-        ONVEC[i] = (propDB[SPNM[i-1]]['ON'])
         HoVVEC[i] = (propDB[SPNM[i-1]]['HoV'])
         SLVEC[i] = (propDB[SPNM[i-1]]['SL'])
         LFV150VEC[i] = (propDB[SPNM[i-1]]['LFV150'])
@@ -65,7 +64,6 @@ def make_property_vector(propDB):
     propvec = {}
     propvec['RON'] = RONVEC.copy()
     propvec['S'] = SVEC.copy()
-    propvec['ON'] = ONVEC.copy()
     propvec['HoV'] = HoVVEC.copy()
     propvec['SL'] = SLVEC.copy()
     propvec['LFV150'] = LFV150VEC.copy()
@@ -100,7 +98,6 @@ def make_property_dict(propDB):
     for i in range(1, ncomp+1):
         RONVEC[i] = (propDB[SPNM[i-1]]['RON'])
         SVEC[i] = (propDB[SPNM[i-1]]['S'])
-        ONVEC[i] = (propDB[SPNM[i-1]]['ON'])
         HoVVEC[i] = (propDB[SPNM[i-1]]['HoV'])
         SLVEC[i] = (propDB[SPNM[i-1]]['SL'])
         LFV150VEC[i] = (propDB[SPNM[i-1]]['LFV150'])
@@ -111,7 +108,6 @@ def make_property_dict(propDB):
     propvec = {}
     propvec['RON'] = RONVEC.copy()
     propvec['S'] = SVEC.copy()
-    propvec['ON'] = ONVEC.copy()
     propvec['HoV'] = HoVVEC.copy()
     propvec['SL'] = SLVEC.copy()
     propvec['LFV150'] = LFV150VEC.copy()
@@ -211,17 +207,21 @@ def write_xl_db(propDB, outfile, order=None, keyorder=None):
 def load_propDB(fname, propDB_initial=None, maxrows=18, maxcols=14):
     xl_wb = xlrd.open_workbook(fname)
     xl_s = xl_wb.sheet_by_index(0)
+    ncol = xl_s.ncols;
+    nrow = xl_s.nrows;
     cas_col = xl_s.col(0)
     id_col = xl_s.col(0)
     cas = []
     ids = []
     hdr = xl_s.row(0)
 
+    print("maximum columns:{}".format(ncol))
+    print("rows: {}".format(nrow))
     i = 0
     propDB = {}
     if propDB_initial is not None:
         propDB = propDB_initial.copy()
-    for i in range(1, maxrows):
+    for i in range(1, nrow):
         vals = xl_s.row(i)[0:maxcols]
         newcomponent = {}
         for h, v in zip(hdr, vals):

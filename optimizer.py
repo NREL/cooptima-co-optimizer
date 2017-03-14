@@ -160,16 +160,15 @@ def run_optimize_vs_K(KK, propDB, initial_X=None,ref=None,sen=None):
         def obj_fun(model):
             this_ron = blend_linear_pyomo(model, 'RON')
             this_s = blend_linear_pyomo(model, 'S')
-            this_on = blend_linear_pyomo(model, 'ON')
             this_HoV = blend_linear_pyomo(model, 'HoV')
             this_SL = blend_linear_pyomo(model, 'SL')
             this_LFV150 = blend_linear_pyomo(model, 'LFV150')
             this_PMI = blend_linear_pyomo(model, 'PMI')
             if( ref is None):
-                return mmf_single(RON=this_ron, S=this_s, ON=this_on, HoV=this_HoV,
+                return mmf_single(RON=this_ron, S=this_s, HoV=this_HoV,
                                   SL=this_SL, K=KK)
             else:
-                return mmf_single_param(ref,sen, RON=this_ron, S=this_s, ON=this_on, HoV=this_HoV,
+                return mmf_single_param(ref,sen, RON=this_ron, S=this_s, HoV=this_HoV,
                                         SL=this_SL, K=KK)
 
         def fraction_constraint(model):
@@ -185,7 +184,6 @@ def run_optimize_vs_K(KK, propDB, initial_X=None,ref=None,sen=None):
 
         model.RON = Param(model.I, initialize=propvec['RON'])
         model.S = Param(model.I, initialize=propvec['S'])
-        model.ON = Param(model.I, initialize=propvec['ON'])
         model.HoV = Param(model.I, initialize=propvec['HoV'])
         model.SL = Param(model.I, initialize=propvec['SL'])
         model.LFV150 = Param(model.I, initialize=propvec['LFV150'])
@@ -281,16 +279,16 @@ def comp_to_cost_mmf(comp, propDB, k):
 def comp_to_mmf(comp, propDB, k,ref=None,sen=None):
         # Evaluate resulting mmf value
         # print comp
-        prop_list = ['RON', 'S', 'ON', 'HoV', 'SL', 'LFV150', 'PMI']
+        prop_list = ['RON', 'S', 'HoV', 'SL', 'LFV150', 'PMI']
         props = {}
         for p in prop_list:
             props[p] = blend_linear_propDB(p, propDB, comp)
         if ref is None and sen is None:
-            mmf = mmf_single(RON=props['RON'], S=props['S'], ON=props['ON'],
+            mmf = mmf_single(RON=props['RON'], S=props['S'], 
                              HoV=props['HoV'], SL=props['SL'],
                              LFV150=props['LFV150'], PMI=props['PMI'], K=k)
         else:   
-            mmf = mmf_single_param(ref,sen,RON=props['RON'], S=props['S'], ON=props['ON'],
+            mmf = mmf_single_param(ref,sen,RON=props['RON'], S=props['S'], 
                                    HoV=props['HoV'], SL=props['SL'],
                                    LFV150=props['LFV150'], PMI=props['PMI'], K=k)
         cost = blend_linear_propDB('COST', propDB, comp)

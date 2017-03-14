@@ -33,7 +33,6 @@ def blend_fcn(prop, propDB, comp):
         'HoV': blend_linear,
         'SL': blend_linear,
         'LFV150': blend_linear,
-        'ON': blend_linear,
         'PMI': blend_linear,
         'MOLWT': blend_linear,
         'BP': blend_linear,
@@ -64,8 +63,6 @@ def blend_linear_pyomo(model, whichprop):
         return summation(model.X, model.RON, index=model.I)
     elif whichprop == 'S':
         return summation(model.X, model.S, index=model.I)
-    elif whichprop == 'ON':
-        return summation(model.X, model.ON, index=model.I)
     elif whichprop == 'HoV':
         return summation(model.X, model.HoV, index=model.I)
     elif whichprop == 'SL':

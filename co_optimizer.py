@@ -161,6 +161,7 @@ if __name__ == '__main__':
         plt.savefig(cooptimizer_input.k_sweep_plotfilename, form='pdf')
         output_files.append(cooptimizer_input.k_sweep_plotfilename)
         output_files.append(cooptimizer_input.k_sweep_datafilename)
+
     if cooptimizer_input.task_list['K_sampling']:
         plt.close()
         compfile = open(cooptimizer_input.k_sampling_datafilename, 'w')
@@ -180,7 +181,7 @@ if __name__ == '__main__':
 
         M = []
         KVEC = []
-        KVEC = np.random.normal(cooptimizer_input.kmean,cooptimizer_input.kvar,n)
+        KVEC = np.random.normal(cooptimizer_input.kmean, cooptimizer_input.kvar,n)
         for ii in range(n):
             KK = KVEC[ii]
             if cooptimizer_input.use_pyomo:
