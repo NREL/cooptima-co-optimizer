@@ -51,14 +51,13 @@ def eval_mo(individual, propvec, Kinp):
 
     this_ron = blend(individual, propvec, 'RON')
     this_s = blend(individual, propvec, 'S')
-    this_on = blend(individual, propvec, 'ON')
     this_HoV = blend(individual, propvec, 'HoV')
     this_SL = blend(individual, propvec, 'SL')
     this_LFV150 = blend(individual, propvec, 'LFV150')
     this_PMI = blend(individual, propvec, 'PMI')
     cost_f = blend(individual, propvec, 'COST')
 
-    merit_f = mmf_single(RON=this_ron, S=this_s, ON=this_on,
+    merit_f = mmf_single(RON=this_ron, S=this_s,
                          HoV=this_HoV, SL=this_SL, K=Kinp)
 
     g_val = fraction_constraint(individual)
