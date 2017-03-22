@@ -29,6 +29,33 @@ import xlrd
 import xlwt
 import sys
 
+def ResizeList(l, size, fill_with=None):
+    l += [fill_with]*(size-len(l))
+
+def make_property_vector_all(propDB):
+    ncomp = 0
+    spids = []
+
+    for k in propDB.keys():
+        spids.append(k)
+
+    ncomp = len(spids)
+
+    props = propDB[propDB.keys()[0]].keys()
+
+    propvec = {}
+    for prop in props:
+        propvec[prop] = np.zeros(ncomp)
+        #ResizeList(propvec[prop], ncomp)
+
+        for i in range(0, ncomp):
+            try:
+                propvec[prop][i] = propDB[spids[i]][prop]
+            except:
+                propvec[prop][i] = 0
+
+    return ncomp, spids, propvec
+
 def make_property_vector(propDB):
 
     # Assemble property vectors for each composition
@@ -273,8 +300,8 @@ def load_propDB(fname, propDB_initial=None, maxrows=18, maxcols=14):
     propDB = {}
     if propDB_initial is not None:
         propDB = propDB_initial.copy()
-    for i in range(1, nrow):
-        vals = xl_s.row(i)[0:maxcols]
+    for i in range(1, xl_s.nrows):
+        vals = xl_s.row(i)[0:xl_s.ncols]
         newcomponent = {}
         for h, v in zip(hdr, vals):
             newcomponent[h.value] = v.value
