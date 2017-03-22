@@ -79,3 +79,36 @@ def blend_linear_pyomo(model, whichprop):
 # This is the one for general (numpy based) use, including nsga2
 def blend_linear_vec(x_vec, prop_vec, whichprop):
     return np.sum(x_vec*prop_vec[whichprop])
+
+def blend_fancy_vec(x_vec, prop_vec, whichprop):
+    # Build function for bRON, bMON on the fly
+    # If fuel is pure component, RON is the bRON at that fraction
+    # If fuel is blendstock, RON is the measured RON
+    
+    # Mass, mole, energy, volume weighted as appropriate
+
+    # AFR, HoV, PMI - mass basis
+    # RON, MON, S - bRON, bMON, bS, volume basis
+    # LFV150 - volume basis
+    # 
+
+def get_other_fractions(x_vec, prop_vec, whichbasis):
+    if whichbasis is 'VOLUME':
+        # Need density on mole basis
+        # V_i  in g/cm^3 from database
+        # V_i/w_i should be mol/cm^3
+        # V = sum(x_i/(V_i/w_i))
+        # vfrac_i = x_i/(V_i/w_i)/V
+        pass
+
+    if whichbasis is 'MASS':
+        # Base on fraction of avg. molecular weight
+        # w_avg = sum(w_i x_i)
+        # y_i = w_i*x_i/w_avg
+        pass
+
+    if whichbasis is 'ENERGY':
+        # Need LHV on mole basis; assume db is in kJ/kg
+        # Skip this for now, only need for S_L
+        pass
+

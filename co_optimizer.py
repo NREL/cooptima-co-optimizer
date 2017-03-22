@@ -24,7 +24,8 @@ import sys
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
-from fuelsdb_interface import load_propDB, make_property_vector
+from fuelsdb_interface import load_propDB, make_property_vector,\
+                              make_property_vector_sample_cost
 from optimizer import run_optimize_vs_C as run_optimize_pyomo_C,\
                       comp_to_cost_mmf, comp_to_mmf,\
                       run_optimize_vs_K as run_optimize_pyomo_K
@@ -71,7 +72,7 @@ if __name__ == '__main__':
     print ("Reading fuel component costs from: ",
            cooptimizer_input.component_cost_database)
     propDB = load_propDB(cooptimizer_input.component_cost_database,
-                         propDB_initial=propDB, maxrows=18, maxcols=2)
+                         propDB_initial=propDB, maxrows=18, maxcols=3)
     print ('-----------------------------------------------------------------')
 
     output_files = []
@@ -100,7 +101,7 @@ if __name__ == '__main__':
                 C = []
                 M = []
                 compfile.write("K = {}-------------------------\n".format(KK))
-                for cs in np.linspace(1.5, 15.0, 10):
+                for cs in np.linspace(1.5, 15.0, 15):
                     comp, isok = run_optimize_pyomo_C(cs, KK, propDB)
                     if (isok):
                         c, m = comp_to_cost_mmf(comp, propDB, KK)
@@ -120,6 +121,73 @@ if __name__ == '__main__':
         plt.savefig(cooptimizer_input.cost_vs_merit_plotfilename, form='pdf')
         output_files.append(cooptimizer_input.cost_vs_merit_plotfilename)
         output_files.append(cooptimizer_input.cost_vs_merit_datafilename)
+
+    if cooptimizer_input.task_list['cost_vs_merit_Pareto_UP']:
+        plt.close()
+        compfile = open(cooptimizer_input.cost_vs_merit_datafilename, 'w')
+        print ("Running cost vs merit function Pareto front analysis with sampling")
+        n = len(cooptimizer_input.KVEC)
+        print ("Running {} K values: {}".format(n, cooptimizer_input.KVEC))
+        ncomp, spc_names, propvec = make_property_vector(propDB)
+
+        if cooptimizer_input.use_pyomo and cooptimizer_input.use_deap_NSGAII:
+            print("Choose only 1 optimizer method")
+            print("(not use_pyomo and use_deap_NSGAII)!")
+            sys.exit(-2)
+        for KK, col, mk in zip(cooptimizer_input.KVEC, clr[0:n+1], mrk[0:n+1]):
+            if cooptimizer_input.use_pyomo:
+                print("Not yet implemented using PyOmo")
+                sys.exit(-1)
+                C = []
+                M = []
+                compfile.write("K = {}-------------------------\n".format(KK))
+                for cs in np.linspace(1.5, 15.0, 15):
+                    comp, isok = run_optimize_pyomo_C(cs, KK, propDB)
+                    if (isok):
+                        c, m = comp_to_cost_mmf(comp, propDB, KK)
+                        C.append(c)
+                        M.append(m)
+                        write_composition(compfile, comp)
+                compfile.write("\n")
+
+            elif cooptimizer_input.use_deap_NSGAII:
+                Clist = []
+                Mlist = []
+                costlist = []
+                for ns in range(cooptimizer_input.nsamples):
+                    print("sample: {}".format(ns))
+                    ncomp, spc_names, propvec = make_property_vector_sample_cost(propDB)
+                    C, M = run_optmize_nsga2(KK, propvec)
+                    Clist.append(C)
+                    Mlist.append(M)
+                    costlist.append(propvec['COST'])
+
+            else:
+                print("No valid optimization algorithm specified")
+                sys.exit(-1)
+            spdfile = open('sampling_pareto_data.txt','w')
+            for C,M in zip(Clist,Mlist):
+                for c,m in zip(C,M):
+                    spdfile.write("{},{}\n".format(c,m))
+                plt.scatter(C, M, label="K={}".format(KK), marker='.')
+                plt.xlabel('Cost')
+                plt.ylabel('Merit')
+            spdfile.close()
+        #plt.legend(loc=8, ncol=3, fontsize=10)
+        plt.savefig(cooptimizer_input.cost_vs_merit_plotfilename, form='pdf')
+        costarray = np.array(costlist)
+        plt.close()
+        with PdfPages('cost_samples.pdf') as pdf:
+            for i in range(costarray.shape[1]):
+                plt.hist(costarray[:,i])
+                plt.xlabel("{}".format(spc_names[i]))
+                pdf.savefig()
+                plt.close()
+    
+      
+        output_files.append(cooptimizer_input.cost_vs_merit_plotfilename)
+        output_files.append(cooptimizer_input.cost_vs_merit_datafilename)
+
 
     if cooptimizer_input.task_list['K_vs_merit_sweep']:
         plt.close()

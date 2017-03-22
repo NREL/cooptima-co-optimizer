@@ -27,7 +27,7 @@ import copy
 import numpy as np
 import xlrd
 import xlwt
-
+import sys
 
 def make_property_vector(propDB):
 
@@ -59,6 +59,58 @@ def make_property_vector(propDB):
         LFV150VEC[i] = (propDB[SPNM[i-1]]['LFV150'])
         PMIVEC[i] = (propDB[SPNM[i-1]]['PMI'])
         COSTVEC[i] = (propDB[SPNM[i-1]]['COST'])
+        XVEC[i] = 0.05
+
+    propvec = {}
+    propvec['RON'] = RONVEC.copy()
+    propvec['S'] = SVEC.copy()
+    propvec['HoV'] = HoVVEC.copy()
+    propvec['SL'] = SLVEC.copy()
+    propvec['LFV150'] = LFV150VEC.copy()
+    propvec['PMI'] = PMIVEC.copy()
+    propvec['COST'] = COSTVEC.copy()
+
+    return ncomp, SPNM, propvec
+
+def make_property_vector_sample_cost(propDB):
+
+    # Assemble property vectors for each composition
+    # Basically just transpose the information in propDB
+    ncomp = 0
+    SPNM = []
+    for k in propDB.keys():
+        # for kk in propDB[k].keys():
+            # print ("key: {}".format(kk))
+        SPNM.append(k)
+    ncomp = len(SPNM)
+
+    RONVEC = np.zeros(ncomp)
+    SVEC = np.zeros(ncomp)
+    ONVEC = np.zeros(ncomp)
+    HoVVEC = np.zeros(ncomp)
+    SLVEC = np.zeros(ncomp)
+    LFV150VEC = np.zeros(ncomp)
+    PMIVEC = np.zeros(ncomp)
+    COSTVEC = np.zeros(ncomp)
+    XVEC = np.zeros(ncomp)
+
+    for i in range(0, ncomp):
+        RONVEC[i] = (propDB[SPNM[i-1]]['RON'])
+        SVEC[i] = (propDB[SPNM[i-1]]['S'])
+        HoVVEC[i] = (propDB[SPNM[i-1]]['HoV'])
+        SLVEC[i] = (propDB[SPNM[i-1]]['SL'])
+        LFV150VEC[i] = (propDB[SPNM[i-1]]['LFV150'])
+        PMIVEC[i] = (propDB[SPNM[i-1]]['PMI'])
+        zz = 0
+        while True:
+            COSTVEC[i] = np.random.normal(propDB[SPNM[i-1]]['COST'], propDB[SPNM[i-1]]['COSTVAR'])
+            if COSTVEC[i] > 0:
+                break
+            zz += 1
+            if( zz > 1000):
+                print ("Should never have gotten here")
+                sys.exit(-1)
+
         XVEC[i] = 0.05
 
     propvec = {}
@@ -228,15 +280,46 @@ def load_propDB(fname, propDB_initial=None, maxrows=18, maxcols=14):
             newcomponent[h.value] = v.value
         # If no initial database was supplied,
         # just copy the entire dictionary over
-        if propDB_initial is None:
-            propDB[newcomponent['CAS']] = (copy.deepcopy(newcomponent))
-        else:
-            for k, v in newcomponent.iteritems():
-                # print "Old record", propDB[newcomponent['CAS']]
-                if k is not 'CAS':
-                    # print "adding key: ", k, ' value:', v
-                    propDB[newcomponent['CAS']][k] = v
 
+        # key for item we're looking at:
+        # Key preference is CAS, pk_UUID, co_ID
+        if('CAS' in newcomponent.keys() and newcomponent['CAS']):
+            kk = newcomponent['CAS']
+        elif('pk_UUID' in newcomponent.keys() and newcomponent['pk_UUID']):
+            kk = newcomponent['pk_UUID']
+        elif('co_ID' in newcomponent.keys() and newcomponent['co_ID']):
+            kk = newcomponent['co_ID']
+        else:
+            continue
+
+        if propDB_initial is None:
+                propDB[kk] = (copy.deepcopy(newcomponent))
+        else:
+            print "Updating record with key = ", kk
+            if kk in propDB.keys():
+                print "key already exists:", kk
+                print "   Old name:", propDB[kk]['NAME']
+                print "   New name:", newcomponent['NAME']
+                for k, v in newcomponent.iteritems():
+                    # print "Old record", propDB[newcomponent['CAS']]
+                    if k is 'NAME':
+                        if propDB[kk][k] is not v:
+                            if propDB[kk]['XTRA_NAMES']:
+                                propDB[kk]['XTRA_NAMES'].append(v)
+                            else:
+                                propDB[kk]['XTRA_NAMES'] = []
+                                propDB[kk]['XTRA_NAMES'].append(v)
+    
+                        # print "adding key: ", k, ' value:', v
+                    else:
+                        print "key: ", k, "value: ", v
+                        propDB[kk][k] = v
+
+            else:
+                print "key did not exist:", kk
+                propDB[kk] = {}
+                for k, v in newcomponent.iteritems():
+                    propDB[kk][k] = v
     # for cas, rec in propDB.iteritems():
     #     propDB[cas]['NAME'] = "RON {},Sl {}".format(propDB[cas]['RON'],
     #                                                 propDB[cas]['SL'])
