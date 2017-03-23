@@ -86,9 +86,9 @@ def blend_fancy_vec(x_vec, prop_vec, whichprop):
     if whichprop == 'RON':
         # Need volume fractions
         x_volume = get_other_fractions(x_vec, prop_vec, 'VOLUME')
-        print x_volume
+        #print x_volume
         x_mass = get_other_fractions(x_vec, prop_vec, 'MASS')
-        print "x_mass", x_mass
+        #print "x_mass", x_mass
         bRON = np.zeros(len(x_vec))
         for i in range(len(x_vec)):
             if prop_vec['BOB'][i] == 1:
@@ -229,7 +229,8 @@ def get_other_fractions(x_vec, prop_vec, whichbasis):
 
 def volume_to_other(v_vec, prop_vec, whichbasis='MOLE'):
     if whichbasis is 'MOLE':
-        print "molwt: ", prop_vec['MOLWT']
+        
+        # print "molwt: ", prop_vec['MOLWT']
         x = v_vec*prop_vec['DENSITY']/prop_vec['MOLWT']
         x_frac = x/np.sum(x)
         return x_frac
@@ -247,7 +248,7 @@ def volume_to_other(v_vec, prop_vec, whichbasis='MOLE'):
 
 def get_bRON_fcns(fp):
 
-    print fp
+#    print fp
 
     bRON_dict = {}
     bMON_dict = {}

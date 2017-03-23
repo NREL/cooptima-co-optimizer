@@ -39,6 +39,8 @@ from merit_functions import mmf_single_param, mmf_single
 from blend_functions import blend_linear_vec, blend_fancy_vec, volume_to_other
 from merit_functions import jim_bob_mf, revised_mf
 import xlrd
+from scipy.optimize import minimize, fmin
+
 def get_xvec(comp, spids):
 
     x = np.zeros([len(spids)])
@@ -46,9 +48,47 @@ def get_xvec(comp, spids):
         if spids[i] in comp.keys():
             x[i] = comp[spids[i]]
 
-    print("{}".format(x))
+    #print("{}".format(x))
 
     return x
+
+def eval_merit(x, propvec, K=-1.25):
+    ron = blend_fancy_vec(x,propvec,'RON')
+    sen = blend_fancy_vec(x,propvec,'S')
+    HoV = blend_fancy_vec(x,propvec,'HoV')
+    AFR = blend_fancy_vec(x,propvec,'AFR_STOICH')       
+    LFV150 = blend_fancy_vec(x,propvec,'LFV150')
+    PMI = blend_fancy_vec(x,propvec,'PMI')
+    return revised_mf(RON=ron, S=sen, HoV=HoV, AFR=AFR, LFV150=LFV150, PMI=PMI, K=K)
+
+def comp_mf(cas, BOB, spids, propvec, vf):
+        thiscomp = {cas:vf, BOB:(1-vf)}
+        x = get_xvec(thiscomp, spids)
+        x = volume_to_other(x, propvec, 'MOLE')
+        M = eval_merit(x, propvec)
+        return M
+
+
+def find_e10_blend(cas,BOB, spids, propvec):
+    # E10 merit in this BOB
+
+    e10comp = {'64-17-5':0.1, BOB:0.9}
+#    e10comp = {'64-17-5':0.3, BOB:0.7}
+    x = get_xvec(e10comp, spids)
+    x = volume_to_other(x, propvec, 'MOLE')
+    ME10 = eval_merit(x, propvec )
+
+    fsq = lambda vf: (comp_mf(cas, BOB, spids, propvec, vf) - ME10)**2
+
+    vf = 0.3
+    res = minimize(fsq, vf, method='Nelder-Mead')
+    print("Residual: {}".format(res.fun))
+    vfrac_E10_equiv = res.x[0]
+    #    print("{}".format(res))
+    if res.success and res.fun < 1.0e-5:
+        return ME10, vfrac_E10_equiv
+    else:
+        return ME10, None
 
 
 
@@ -59,7 +99,7 @@ if __name__ == '__main__':
 
     propDB = load_propDB('testDB.xls')
     ncomp, spids, propvec = make_property_vector_all(propDB)
-    print("{}; {}".format( ncomp, spids))
+    #    print("{}; {}".format( ncomp, spids))
 #    print("{}".format(propvec))
 
     # Set up some compositions to test:
@@ -77,101 +117,102 @@ if __name__ == '__main__':
         cas_list.append(c.value)
         jbm_list.append(jb.value)
 
+    if True:
+        plt.close()
+        e10lvl = {}
+        for BOB in ['BOB-1', 'BOB-2', 'BOB-3']:
+#            BOB = 'BOB-1'
+            e10lvl[BOB] = []
+            for cas in cas_list:
+                ME10, vfrac_E10_equiv = find_e10_blend(cas, BOB=BOB, spids=spids, propvec=propvec)
+                print ("Merit function, E10, {} = {}; equivalent VF = {} ".format(BOB, ME10,vfrac_E10_equiv))
+                if vfrac_E10_equiv is not None and vfrac_E10_equiv > 0.0 and vfrac_E10_equiv < 1.0:
+                    e10lvl[BOB].append(vfrac_E10_equiv)
+                else:
+                    e10lvl[BOB].append(None)
+            #mf_results = []
+            #for cas, vf in zip(cas_list, bob1_e10lvl):
+            #    if vf is not None:
+            #       mf_results.append(comp_mf(cas, BOB=BOB, spids=spids, propvec=propvec, vf=vf))
+            #    else:
+            #        mf_results.append(None)
+
+         
+            print ("Done {}".format(BOB))
+        f, ax = plt.subplots()
+        for k, v in e10lvl.iteritems():
+            ax.plot(v,'o',ms=10,label=k)
+        ax.plot([0,18],[0.1,0.1],'--k')
+        ax.legend()
+        plt.savefig('e10level.pdf')
+        plt.show()
+#            ax.plot(bob1_e10lvl,label=BOB)
+#        ax.legend()
+#        axs[0].get_yaxis().get_major_formatter().set_useOffset(False)
+#        plt.show()
+
+        #plt.plot(mf_results,'gx')
+        #plt.show()
 
 
-    mf_vals = []
-    mf_idx = []
-    mf_knom = []
-    mf_knom_idx = []
-    isamp = 0
-    for c in cas_list:
-        if len(c) > 0:
-            print(" c = {}".format(c))
-            comp = {c:0.1, 'BOB-1':0.9}
-            x = get_xvec(comp, spids)
-            x = volume_to_other(x, propvec, 'MOLE')
-            print ("mole fracs: {}".format(x))
-             
-            ron = blend_linear_vec(x,propvec,'RON')
-            print ("Mixture RON: {}".format(ron))
+    if False:
+        mf_vals = []
+        mf_idx = []
+        mf_knom = []
+        mf_knom_idx = []
+        isamp = 0
+        for c in cas_list:
+            if len(c) > 0:
+                print(" c = {}".format(c))
+                comp = {c:0.1, 'BOB-1':0.9}
+                x = get_xvec(comp, spids)
+                x = volume_to_other(x, propvec, 'MOLE')
+                print ("mole fracs: {}".format(x))
+                 
+                ron = blend_linear_vec(x,propvec,'RON')
+                print ("Mixture RON: {}".format(ron))
+        
+                ron = blend_fancy_vec(x,propvec,'RON')
+                print ("Fancy Mixture RON: {}".format(ron))
+        
+                sen = blend_fancy_vec(x,propvec,'S')
+                print ("{} Fancy Mixture S: {}".format(isamp, sen))
+        
+                HoV = blend_fancy_vec(x,propvec,'HoV')
+                print ("Fancy Mixture HoV: {}".format(HoV))
+        
+                AFR = blend_fancy_vec(x,propvec,'AFR_STOICH')
+                print ("Fancy Mixture AFR: {}".format(AFR))
+        
+                LFV150 = blend_fancy_vec(x,propvec,'LFV150')
+                print ("Fancy Mixture LFV150: {}".format(LFV150))
+        
+                PMI = blend_fancy_vec(x,propvec,'PMI')
+                print ("Fancy Mixture PMI: {}".format(PMI))
+        
+                #jbm = jim_bob_mf(RON=ron, S=sen, HoV=HoV, AFR=AFR, LFV150=LFV150, PMI=PMI)
+                #print ("jim_bob_merit = {}".format(jbm))
+        
+                # revm = revised_mf(RON=ron, S=sen, HoV=HoV, AFR=AFR, LFV150=LFV150, PMI=PMI)
+                # print ("rev_merit = {}".format(revm))
+        # 
+                # Sample mf
+                ksamp = np.random.normal(-1.25,0.5,5000)
+                for k in ksamp:
+                    jbm = revised_mf(RON=ron, S=sen, HoV=HoV, AFR=AFR, LFV150=LFV150, PMI=PMI, K=k)
+                #print ("jim_bob_merit = {}".format(jbm))
+                    mf_vals.append(jbm)
+                    mf_idx.append(isamp)
     
-            ron = blend_fancy_vec(x,propvec,'RON')
-            print ("Fancy Mixture RON: {}".format(ron))
+                jbm = revised_mf(RON=ron, S=sen, HoV=HoV, AFR=AFR, LFV150=LFV150, PMI=PMI, K=-1.25)
+                mf_knom.append(jbm)
+                mf_knom_idx.append(isamp)
+                isamp += 1
     
-            sen = blend_fancy_vec(x,propvec,'S')
-            print ("{} Fancy Mixture S: {}".format(isamp, sen))
     
-            HoV = blend_fancy_vec(x,propvec,'HoV')
-            print ("Fancy Mixture HoV: {}".format(HoV))
-    
-            AFR = blend_fancy_vec(x,propvec,'AFR_STOICH')
-            print ("Fancy Mixture AFR: {}".format(AFR))
-    
-            LFV150 = blend_fancy_vec(x,propvec,'LFV150')
-            print ("Fancy Mixture LFV150: {}".format(LFV150))
-    
-            PMI = blend_fancy_vec(x,propvec,'PMI')
-            print ("Fancy Mixture PMI: {}".format(PMI))
-    
-            #jbm = jim_bob_mf(RON=ron, S=sen, HoV=HoV, AFR=AFR, LFV150=LFV150, PMI=PMI)
-            #print ("jim_bob_merit = {}".format(jbm))
-    
-            # revm = revised_mf(RON=ron, S=sen, HoV=HoV, AFR=AFR, LFV150=LFV150, PMI=PMI)
-            # print ("rev_merit = {}".format(revm))
-    # 
-            # Sample mf
-            ksamp = np.random.normal(-1.25,0.5,5000)
-            for k in ksamp:
-                jbm = revised_mf(RON=ron, S=sen, HoV=HoV, AFR=AFR, LFV150=LFV150, PMI=PMI, K=k)
-            #print ("jim_bob_merit = {}".format(jbm))
-                mf_vals.append(jbm)
-                mf_idx.append(isamp)
+        plt.plot(mf_idx, mf_vals,'g.',ms=4)
+        plt.plot(mf_knom_idx, mf_knom,'k+',ms=6)
+        plt.savefig('mf_scatter.png')
 
-            jbm = revised_mf(RON=ron, S=sen, HoV=HoV, AFR=AFR, LFV150=LFV150, PMI=PMI, K=-1.25)
-            mf_knom.append(jbm)
-            mf_knom_idx.append(isamp)
-            isamp += 1
-
-
-    plt.plot(mf_idx, mf_vals,'g.',ms=4)
-    plt.plot(mf_knom_idx, mf_knom,'k+',ms=6)
-    plt.savefig('mf_scatter.png')
-#    plt.plot(jbm_list,'r+',ms=14)
-#    plt.show()
-
-    #for i in range(len(spids)):
-    #    fld = 'BOB'
-    #    print("{}  \t\t\t\t\t {} \t {} \t {}".format(spids[i],fld,propvec[fld][i],x[i]))
-#
-    #ron = blend_linear_vec(x,propvec,'RON')
-    #print ("Mixture RON: {}".format(ron))
-#
-    #ron = blend_fancy_vec(x,propvec,'RON')
-    #print ("Fancy Mixture RON: {}".format(ron))
-#
-    #sen = blend_fancy_vec(x,propvec,'S')
-    #print ("Fancy Mixture S: {}".format(sen))
-#
-    #HoV = blend_fancy_vec(x,propvec,'HoV')
-    #print ("Fancy Mixture HoV: {}".format(HoV))
-#
-    #AFR = blend_fancy_vec(x,propvec,'AFR_STOICH')
-    #print ("Fancy Mixture AFR: {}".format(AFR))
-#
-    #LFV150 = blend_fancy_vec(x,propvec,'LFV150')
-    #print ("Fancy Mixture LFV150: {}".format(LFV150))
-#
-    #PMI = blend_fancy_vec(x,propvec,'PMI')
-    #print ("Fancy Mixture PMI: {}".format(PMI))
-#
-    #jbm = jim_bob_mf(RON=ron, S=sen, HoV=HoV, AFR=AFR, LFV150=LFV150, PMI=PMI)
-    #print ("jim_bob_merit = {}".format(jbm))
-#
-    #revm = revised_mf(RON=ron, S=sen, HoV=HoV, AFR=AFR, LFV150=LFV150, PMI=PMI)
-#    print ("rev_merit = {}".format(revm))
-        #mmf_single(RON=bp['RON'], S=bp['S'],
-        #                            HoV=bp['HoV'], SL=bp['SL'],
-        #                            LFV150=bp['LFV150'], PMI=bp['PMI'],
-        #                            K=ksamp[ns])
 
 
