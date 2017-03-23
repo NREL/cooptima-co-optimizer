@@ -25,7 +25,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 from fuelsdb_interface import load_propDB,\
-                              make_property_vector_sample_cost
+                              make_property_vector_all_sample_cost
 from fuelsdb_interface import make_property_vector_all 
 from optimizer import run_optimize_vs_C as run_optimize_pyomo_C,\
                       comp_to_cost_mmf, comp_to_mmf,\
@@ -158,7 +158,8 @@ if __name__ == '__main__':
                 costlist = []
                 for ns in range(cooptimizer_input.nsamples):
                     print("sample: {}".format(ns))
-                    ncomp, spc_names, propvec = make_property_vector_sample_cost(propDB)
+                    ncomp, spc_names, propvec = make_property_vector_all_sample_cost(propDB)
+                    print("Staring optimization")
                     C, M = run_optmize_nsga2(KK, propvec)
                     Clist.append(C)
                     Mlist.append(M)

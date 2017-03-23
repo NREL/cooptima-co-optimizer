@@ -62,6 +62,53 @@ def make_property_vector_all(propDB):
 
     return ncomp, spids, propvec
 
+def make_property_vector_all_sample_cost(propDB):
+    ncomp = 0
+    spids = []
+
+    for k in propDB.keys():
+        spids.append(k)
+
+    ncomp = len(spids)
+
+    props = propDB[propDB.keys()[0]].keys()
+
+    propvec = {}
+    for prop in props:
+        propvec[prop] = np.zeros(ncomp)
+        #ResizeList(propvec[prop], ncomp)
+
+        if prop == 'NAME':
+            propvec[prop] = []
+            for i in range(0, ncomp):
+                propvec[prop].append(propDB[spids[i]][prop])
+
+        if prop == 'COST':
+            for i in range(0, ncomp):
+                zz = 0
+                while True:
+                    propvec['COST'][i] = \
+                    np.random.normal(propDB[spids[i]]['COST'], \
+                        propDB[spids[i]]['COSTVAR'])
+                    if (propvec['COST'][i] > 0.0):
+                        break
+                    zz += 1
+                    if( zz > 1000):
+                        print ("Should never have gotten here")
+                        sys.exit(-1)
+
+
+        else:
+            for i in range(0, ncomp):
+                try:
+                    propvec[prop][i] = propDB[spids[i]][prop]
+                except:
+                    propvec[prop][i] = 0
+
+    return ncomp, spids, propvec
+
+
+
 def make_property_vector(propDB):
 
     # Assemble property vectors for each composition

@@ -48,6 +48,8 @@ def fraction_constraint(individual):
     """Compute the constraint function value (sum over all parameters = 1)"""
     return sum(individual)
 
+def bob_constraint(individual, propvec):
+    return sum(individual*propvec['BOB'])
 
 def eval_mo(individual, propvec, Kinp):
 
@@ -147,8 +149,10 @@ def nsga2_pareto_K(KK, propvec, seed=None):
 
     #  These are parameters that can be adjusted and may change
     #  the algorithm's performance
-    NGEN = 300  # Number of generations
-    MU = 100  # Number of individuals
+    #NGEN = 300  # Number of generations
+    #MU = 100  # Number of individuals
+    NGEN=300
+    MU=100
     CXPB = 0.75  # Cross-over probability, [0,1]
 
     stats = tools.Statistics(lambda ind: ind.fitness.values)

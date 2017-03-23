@@ -36,9 +36,9 @@ component_max = {}
 # What the co-optimizer should do
 
 # Run a tradeoff analysis between cost and obtainable merit function
-task_list['cost_vs_merit_Pareto'] = True
+task_list['cost_vs_merit_Pareto'] = False
 
-task_list['cost_vs_merit_Pareto_UP'] = False
+task_list['cost_vs_merit_Pareto_UP'] = True
 #TODO: work out how to get distribution of merit possible for a given target cost
 #      based on uncertainty in cost properties. Do by sampling. Then we can put in bin+-delta.
 
@@ -50,7 +50,7 @@ task_list['K_vs_merit_sweep'] = False
 task_list['K_sampling'] = False
 k_sampling_datafilename = 'k_sampling.txt'
 k_sampling_plotfilename = 'k_sampling.pdf'
-nsamples = 1200
+nsamples = 100
 kmean = 0.5
 kvar = 1.0
 
@@ -139,7 +139,8 @@ k_sweep_plotfilename = "ksweep.pdf"
 # Running multiple "K" values in merit function
 #KVEC = [-2.0, -1.5, -1.0,-0.5, 0.5,  1.0, 1.5,2.0,2.5,3.0,3.5,4.0] #-vector
 #KVEC = [-2.0, 0.5,  1.0]  # -vector
-KVEC = [-2.0, -1.25, -0.5]  # -vector
+#KVEC = [-2.0, -1.25, -0.5]  # -vector
+KVEC = [-1.25]  # -vector
 
 
 # -----------------------------------------------------------------------------
