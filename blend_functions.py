@@ -185,6 +185,10 @@ def blend_fancy_vec(x_vec, prop_vec, whichprop):
         x_mass = get_other_fractions(x_vec, prop_vec, 'MASS')
         return np.sum(x_mass*prop_vec['PMI'])
 
+    if whichprop == 'COST':
+        x_volume = get_other_fractions(x_vec, prop_vec, 'VOLUME')
+        return np.sum(x_volume*prop_vec['COST'])
+
     else:
         return blend_linear_vec(x_vec, prop_vec, whichprop)
 

@@ -40,7 +40,7 @@ from blend_functions import blend_linear_vec, blend_fancy_vec, volume_to_other
 from merit_functions import jim_bob_mf, revised_mf
 import xlrd
 from scipy.optimize import minimize, fmin
-
+from nsga2_k import eval_mo
 def get_xvec(comp, spids):
 
     x = np.zeros([len(spids)])
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     print ("Testing non-linear blending")
     print ("=================================================================")
 
-    propDB = load_propDB('testDB.xls')
+    propDB = load_propDB('prop_db_AMR.xls')
     ncomp, spids, propvec = make_property_vector_all(propDB)
     #    print("{}; {}".format( ncomp, spids))
 #    print("{}".format(propvec))
@@ -117,7 +117,7 @@ if __name__ == '__main__':
         cas_list.append(c.value)
         jbm_list.append(jb.value)
 
-    if True:
+    if False:
         plt.close()
         e10lvl = {}
         for BOB in ['BOB-1', 'BOB-2', 'BOB-3']:
@@ -164,9 +164,11 @@ if __name__ == '__main__':
         for c in cas_list:
             if len(c) > 0:
                 print(" c = {}".format(c))
-                comp = {c:0.1, 'BOB-1':0.9}
+#                comp = {c:0.1, 'BOB-1':0.9}
+                comp = {c:1.0, 'BOB-1':0.0}
                 x = get_xvec(comp, spids)
                 x = volume_to_other(x, propvec, 'MOLE')
+              
                 print ("mole fracs: {}".format(x))
                  
                 ron = blend_linear_vec(x,propvec,'RON')
@@ -197,22 +199,77 @@ if __name__ == '__main__':
                 # print ("rev_merit = {}".format(revm))
         # 
                 # Sample mf
-                ksamp = np.random.normal(-1.25,0.5,5000)
-                for k in ksamp:
-                    jbm = revised_mf(RON=ron, S=sen, HoV=HoV, AFR=AFR, LFV150=LFV150, PMI=PMI, K=k)
-                #print ("jim_bob_merit = {}".format(jbm))
-                    mf_vals.append(jbm)
-                    mf_idx.append(isamp)
+  #              ksamp = np.random.normal(-1.25,0.5,5000)
+  #              for k in ksamp:
+  #                  jbm = revised_mf(RON=ron, S=sen, HoV=HoV, AFR=AFR, LFV150=LFV150, PMI=PMI, K=k)
+  #              #print ("jim_bob_merit = {}".format(jbm))
+  #                  mf_vals.append(jbm)
+  #                  mf_idx.append(isamp)
     
-                jbm = revised_mf(RON=ron, S=sen, HoV=HoV, AFR=AFR, LFV150=LFV150, PMI=PMI, K=-1.25)
+                jbm = revised_mf(RON=ron, S=sen, HoV=HoV, AFR=AFR, PMI=PMI, K=-1.0)
                 mf_knom.append(jbm)
                 mf_knom_idx.append(isamp)
                 isamp += 1
+                print ("mf: {}".format(jbm))
     
-    
+
         plt.plot(mf_idx, mf_vals,'g.',ms=4)
         plt.plot(mf_knom_idx, mf_knom,'k+',ms=6)
         plt.savefig('mf_scatter.png')
+
+    KK = -0.5
+    x_shuff = [0.001324310350291002, 0.004999871054905616, 0.009597839797339565, 0.020249992558423184, 0.10512280120845688, 0.030188172710182325, 0.05934060289277107, 0.007108223208273045, 0.022569635194655057, 0.07539302507083424, 0.03808834477204709, 0.007216109025727148, 0.14587147969492825, 0.018599742824815118, 0.0007668699773392273, 0.0008101533174170688, 0.008910494766329137, 0.011742609648713554, 0.0746615887576285, 0.07292404878028737, 0.18110486660397077, 0.10340921778466486]
+
+    KK = -2.0
+    x_shuff = [5.429193184724211e-06, 5.4700121342959545e-06, 0.00023574675787848193, 0.0006634005877650475, 0.33420041342149914, 2.253088358924713e-08, 2.929083304649458e-07, 7.84952012879686e-05, 2.539318697385498e-07, 6.472335781271855e-07, 0.0002801601866101847, 5.78982495877495e-06, 0.25715789806490985, 0.000724824623564603, 3.3710529613876674e-05, 0.00013076272054106164, 2.4256566440012568e-06, 3.7455938815765416e-05, 0.13974210154549355, 3.6569331184504476e-06, 0.2665392129798876, 0.0001518292174307078]
+    # Score: 64.4243251413
+
+    KK = -1.25
+    x_shuff = [2.334882429827181e-05, 2.3073828291791606e-06, 1.1373883308286529e-06, 8.460933750952283e-07, 0.352349270601257, 1.9769097040567398e-05, 1.2381570105591349e-06, 0.0008524641601872692, 1.5924796560953116e-06, 5.838187371641677e-05, 1.2989269851950561e-06, 5.051312220823206e-06, 0.24365125365611764, 5.9298089320557183e-05, 1.3779517723124228e-06, 0.00012597507923429462, 5.74394624825527e-07, 7.046856723913778e-06, 0.12045975848472151, 3.0348674144966435e-05, 0.2822741257687364, 7.35347476964213e-05]
+
+    my_names = [u'Ethyl butanoate', u'Diisobutylene', u'2-butanone (MEK)', u'Ethanol', u'2-pentanol', u'Methanol', u'Butyl acetate', u'2-butanol', u'2.4 dimethyl-3- pentanone', u'2-Me-1-butanol', u'sBOB', u'CARBOB', u'wCBOB', u'Isobutanol', u'2-pentanone', u'1-butanol', u'Ethyl acetate', u'Triptane', u'Methyl acetate', u'Anisole', u'Methyl furan', u'Cyclopentanone']
+    nsga_names = [u'2.4 dimethyl-3- pentanone', u'2-Me-1-butanol', u'sBOB', u'CARBOB', u'Methanol', u'Ethyl butanoate', u'Isobutanol', u'2-butanol', u'2-pentanone', u'1-butanol', u'2-butanone (MEK)', u'Ethyl acetate', u'Ethanol', u'2-pentanol', u'Triptane', u'wCBOB', u'Butyl acetate', u'Methyl acetate', u'Diisobutylene', u'Anisole', u'Methyl furan', u'Cyclopentanone']
+
+    x = np.zeros_like(x_shuff)
+    for nm, xs  in zip(nsga_names, x_shuff):
+        spot = my_names.index(nm)
+        print ("{} goes in spot {}, which has name {}".format(nm, spot, my_names[spot]))
+        x[spot] = xs
+
+    isamp = 1
+    print ("mole fracs: {}".format(x))
+            
+    ron = blend_linear_vec(x,propvec,'RON')
+    print ("Mixture RON: {}".format(ron))
+    
+    ron = blend_fancy_vec(x,propvec,'RON')
+    print ("Fancy Mixture RON: {}".format(ron))
+    
+    sen = blend_fancy_vec(x,propvec,'S')
+    print ("{} Fancy Mixture S: {}".format(isamp, sen))
+    
+    HoV = blend_fancy_vec(x,propvec,'HoV')
+    print ("Fancy Mixture HoV: {}".format(HoV))
+    
+    AFR = blend_fancy_vec(x,propvec,'AFR_STOICH')
+    print ("Fancy Mixture AFR: {}".format(AFR))
+    
+    LFV150 = blend_fancy_vec(x,propvec,'LFV150')
+    print ("Fancy Mixture LFV150: {}".format(LFV150))
+    
+    PMI = blend_fancy_vec(x,propvec,'PMI')
+    print ("Fancy Mixture PMI: {}".format(PMI))
+    
+
+    jbm = revised_mf(RON=ron, S=sen, HoV=HoV, AFR=AFR, PMI=PMI, K=KK)
+    print("revised merit fcn: {}".format(jbm))
+  #  print("nsga2 fcn: {}".format(eval_mo(x,propvec,KK)))
+    print("sum: {}".format(np.sum(x)))
+    print("pv RON = {}".format(propvec['NAME']))
+
+    for x, nm in zip(x_shuff, nsga_names):
+        print("{}: {}".format(nm, x))
+
 
 
 

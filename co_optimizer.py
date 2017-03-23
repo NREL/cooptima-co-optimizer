@@ -24,8 +24,9 @@ import sys
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
-from fuelsdb_interface import load_propDB, make_property_vector,\
+from fuelsdb_interface import load_propDB,\
                               make_property_vector_sample_cost
+from fuelsdb_interface import make_property_vector_all 
 from optimizer import run_optimize_vs_C as run_optimize_pyomo_C,\
                       comp_to_cost_mmf, comp_to_mmf,\
                       run_optimize_vs_K as run_optimize_pyomo_K
@@ -90,7 +91,7 @@ if __name__ == '__main__':
         print ("Running cost vs merit function Pareto front analysis")
         n = len(cooptimizer_input.KVEC)
         print ("Running {} K values: {}".format(n, cooptimizer_input.KVEC))
-        ncomp, spc_names, propvec = make_property_vector(propDB)
+        ncomp, spc_names, propvec = make_property_vector_all(propDB)
 
         if cooptimizer_input.use_pyomo and cooptimizer_input.use_deap_NSGAII:
             print("Choose only 1 optimizer method")
@@ -118,6 +119,7 @@ if __name__ == '__main__':
             plt.xlabel('Cost')
             plt.ylabel('Merit')
         plt.legend(loc=8, ncol=3, fontsize=10)
+        plt.title("Co-Optimizer GA Pareto Front")
         plt.savefig(cooptimizer_input.cost_vs_merit_plotfilename, form='pdf')
         output_files.append(cooptimizer_input.cost_vs_merit_plotfilename)
         output_files.append(cooptimizer_input.cost_vs_merit_datafilename)
@@ -128,7 +130,7 @@ if __name__ == '__main__':
         print ("Running cost vs merit function Pareto front analysis with sampling")
         n = len(cooptimizer_input.KVEC)
         print ("Running {} K values: {}".format(n, cooptimizer_input.KVEC))
-        ncomp, spc_names, propvec = make_property_vector(propDB)
+        ncomp, spc_names, propvec = make_property_vector_all(propDB)
 
         if cooptimizer_input.use_pyomo and cooptimizer_input.use_deap_NSGAII:
             print("Choose only 1 optimizer method")

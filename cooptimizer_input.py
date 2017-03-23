@@ -36,9 +36,9 @@ component_max = {}
 # What the co-optimizer should do
 
 # Run a tradeoff analysis between cost and obtainable merit function
-task_list['cost_vs_merit_Pareto'] = False
+task_list['cost_vs_merit_Pareto'] = True
 
-task_list['cost_vs_merit_Pareto_UP'] = True
+task_list['cost_vs_merit_Pareto_UP'] = False
 #TODO: work out how to get distribution of merit possible for a given target cost
 #      based on uncertainty in cost properties. Do by sampling. Then we can put in bin+-delta.
 
@@ -113,8 +113,8 @@ use_deap_NSGAII = True
 # -----------------------------------------------------------------------------
 # Other input / data files
 print("CAUTION --- USING PLACEHOLDER PROPERTIES")
-component_properties_database = 'testpropDB.xls'
-component_cost_database = 'testcostDB.xls'
+component_properties_database = 'prop_db_AMR.xls'
+component_cost_database = 'cost_db_AMR.xlsx'
 
 # -----------------------------------------------------------------------------
 # Output file names
@@ -139,7 +139,7 @@ k_sweep_plotfilename = "ksweep.pdf"
 # Running multiple "K" values in merit function
 #KVEC = [-2.0, -1.5, -1.0,-0.5, 0.5,  1.0, 1.5,2.0,2.5,3.0,3.5,4.0] #-vector
 #KVEC = [-2.0, 0.5,  1.0]  # -vector
-KVEC = [-0.5]  # -vector
+KVEC = [-2.0, -1.25, -0.5]  # -vector
 
 
 # -----------------------------------------------------------------------------

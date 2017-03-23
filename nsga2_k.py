@@ -31,8 +31,10 @@ import random
 
 import numpy
 
-from merit_functions import mmf_single
-from blend_functions import blend_linear_vec as blend
+#from merit_functions import mmf_single
+from merit_functions import revised_mf as mmf_single
+#from blend_functions import blend_linear_vec as blend
+from blend_functions import blend_fancy_vec as blend
 
 from deap import algorithms
 from deap import base
@@ -52,13 +54,17 @@ def eval_mo(individual, propvec, Kinp):
     this_ron = blend(individual, propvec, 'RON')
     this_s = blend(individual, propvec, 'S')
     this_HoV = blend(individual, propvec, 'HoV')
-    this_SL = blend(individual, propvec, 'SL')
+#    this_SL = blend(individual, propvec, 'SL')
+    this_AFR = blend(individual, propvec, 'AFR_STOICH')
     this_LFV150 = blend(individual, propvec, 'LFV150')
     this_PMI = blend(individual, propvec, 'PMI')
     cost_f = blend(individual, propvec, 'COST')
 
+#    merit_f = mmf_single(RON=this_ron, S=this_s,
+#                         HoV=this_HoV, SL=this_SL, K=Kinp)
     merit_f = mmf_single(RON=this_ron, S=this_s,
-                         HoV=this_HoV, SL=this_SL, K=Kinp)
+                         HoV=this_HoV, AFR=this_AFR, PMI=this_PMI, K=Kinp)
+
 
     g_val = fraction_constraint(individual)
 
@@ -70,6 +76,7 @@ def eval_mo(individual, propvec, Kinp):
 
     # penalty_cost = 0 if nothing is changed about creation of individuals
     c_p_p = cost_f+penalty_cost
+#    c_p_p = 0.0 #take out
 
     # penalty_mmf = 0 if nothing is changed about creation of individuals
     mmf_p_p = -(merit_f+penalty_mmf)
@@ -140,7 +147,7 @@ def nsga2_pareto_K(KK, propvec, seed=None):
 
     #  These are parameters that can be adjusted and may change
     #  the algorithm's performance
-    NGEN = 200  # Number of generations
+    NGEN = 300  # Number of generations
     MU = 100  # Number of individuals
     CXPB = 0.75  # Cross-over probability, [0,1]
 
@@ -202,6 +209,9 @@ def nsga2_pareto_K(KK, propvec, seed=None):
 
     pop.sort(key=lambda x: x.fitness.values)
     front = numpy.array([ind.fitness.values for ind in pop])
+    print("NSGA done; hof: {}".format(pf[0]))
+    print("K = {}; Score: {}".format(KK, -eval_mo(pf[0],propvec,KK)[0]))
+    print("pv RON = {}".format(propvec['NAME']))
     return front[:, 1], -front[:, 0]
 
 #    return pop, logbook, hof, pf

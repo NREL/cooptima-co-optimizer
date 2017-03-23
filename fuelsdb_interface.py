@@ -48,11 +48,17 @@ def make_property_vector_all(propDB):
         propvec[prop] = np.zeros(ncomp)
         #ResizeList(propvec[prop], ncomp)
 
-        for i in range(0, ncomp):
-            try:
-                propvec[prop][i] = propDB[spids[i]][prop]
-            except:
-                propvec[prop][i] = 0
+        if prop == 'NAME':
+            propvec[prop] = []
+            for i in range(0, ncomp):
+                propvec[prop].append(propDB[spids[i]][prop])
+
+        else:
+            for i in range(0, ncomp):
+                try:
+                    propvec[prop][i] = propDB[spids[i]][prop]
+                except:
+                    propvec[prop][i] = 0
 
     return ncomp, spids, propvec
 
