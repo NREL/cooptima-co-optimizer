@@ -87,17 +87,26 @@ def make_property_vector_all_sample_cost(propDB):
             for i in range(0, ncomp):
                 zz = 0
                 while True:
+                    if propDB[spids[i]]['COSTVAR'] >0:
+                        #print(spids[i])
+                        propvec['COST'][i] = np.random.normal(propDB[spids[i]]['COST'], propDB[spids[i]]['COSTVAR'])
+                        #print(spids[i], propvec['COST'][i])
+                    else:
+                        propvec['COST'][i] = propDB[spids[i]]['COST']
+
+
+                    '''
                     propvec['COST'][i] = \
                     np.random.normal(propDB[spids[i]]['COST'], \
                         propDB[spids[i]]['COSTVAR'])
+                    '''
                     if (propvec['COST'][i] > 0.0):
                         break
                     zz += 1
                     if( zz > 1000):
                         print ("Should never have gotten here")
                         sys.exit(-1)
-
-
+                       
         else:
             for i in range(0, ncomp):
                 try:
