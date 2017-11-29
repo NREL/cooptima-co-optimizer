@@ -131,7 +131,8 @@ if __name__ == '__main__':
         n = len(cooptimizer_input.KVEC)
         print ("Running {} K values: {}".format(n, cooptimizer_input.KVEC))
         ncomp, spc_names, propvec = make_property_vector_all(propDB)
-
+        print(spc_names[0:4])
+        dfdf
         if cooptimizer_input.use_pyomo and cooptimizer_input.use_deap_NSGAII:
             print("Choose only 1 optimizer method")
             print("(not use_pyomo and use_deap_NSGAII)!")
@@ -156,10 +157,10 @@ if __name__ == '__main__':
                 Clist = []
                 Mlist = []
                 costlist = []
-                for ns in range(cooptimizer_input.nsamples):
+                for ns in range(cooptimizer_input.nsamples): #implement parallelism here, nsamples = # of random trials
                     print("sample: {}".format(ns))
                     ncomp, spc_names, propvec = make_property_vector_all_sample_cost(propDB)
-                    print("Staring optimization")
+                    print("Starting optimization")
                     C, M = run_optmize_nsga2(KK, propvec)
                     Clist.append(C)
                     Mlist.append(M)

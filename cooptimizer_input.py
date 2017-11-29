@@ -39,6 +39,8 @@ component_max = {}
 task_list['cost_vs_merit_Pareto'] = False
 
 task_list['cost_vs_merit_Pareto_UP'] = True
+
+task_list['cost_vs_merit_Pareto_UP_single'] = False
 #TODO: work out how to get distribution of merit possible for a given target cost
 #      based on uncertainty in cost properties. Do by sampling. Then we can put in bin+-delta.
 
@@ -50,7 +52,7 @@ task_list['K_vs_merit_sweep'] = False
 task_list['K_sampling'] = False
 k_sampling_datafilename = 'k_sampling.txt'
 k_sampling_plotfilename = 'k_sampling.pdf'
-nsamples = 100
+nsamples = 100 #number of random numbers used for each cost (basically nsamples runs of the optimizer with different random numbers)
 kmean = 0.5
 kvar = 1.0
 
@@ -114,12 +116,12 @@ use_deap_NSGAII = True
 # Other input / data files
 print("CAUTION --- USING PLACEHOLDER PROPERTIES")
 component_properties_database = 'prop_db_AMR.xls'
-component_cost_database = 'cost_db_AMR.xlsx'
+component_cost_database = 'cost_db_AMR_OG.xlsx'
 
 # -----------------------------------------------------------------------------
 # Output file names
-cost_vs_merit_datafilename = "cost_merit_pareto.txt"
-cost_vs_merit_plotfilename = "cost_merit_pareto.pdf"
+cost_vs_merit_datafilename = "cost_merit_pareto.txt"#for pyomo
+cost_vs_merit_plotfilename = "cost_merit_pareto"
 
 k_sweep_datafilename = "ksweep.txt"
 k_sweep_plotfilename = "ksweep.pdf"
@@ -140,7 +142,7 @@ k_sweep_plotfilename = "ksweep.pdf"
 #KVEC = [-2.0, -1.5, -1.0,-0.5, 0.5,  1.0, 1.5,2.0,2.5,3.0,3.5,4.0] #-vector
 #KVEC = [-2.0, 0.5,  1.0]  # -vector
 #KVEC = [-2.0, -1.25, -0.5]  # -vector
-KVEC = [-1.25]  # -vector
+KVEC = [-1., 1., 2., 3., 4.]  # -vector
 
 
 # -----------------------------------------------------------------------------

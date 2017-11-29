@@ -81,9 +81,11 @@ def eval_mo(individual, propvec, Kinp):
 #    c_p_p = 0.0 #take out
 
     # penalty_mmf = 0 if nothing is changed about creation of individuals
-    mmf_p_p = -(merit_f+penalty_mmf)
+    mmf_p_p = (merit_f+penalty_mmf) #minimize -Merit
 
-    return mmf_p_p, c_p_p
+    #add here more objective functions as needed -- add 1/-1 in line 125, weights (-1 = minimize, 1 = maximize)
+    obj3 = numpy.prod(individual)
+    return mmf_p_p, c_p_p, obj3
 
 
 def uniform(low, up, size=None):
@@ -118,9 +120,9 @@ def scale():
 def nsga2_pareto_K(KK, propvec, seed=None):
 
     NDIM = len(propvec['COST'])  # Number of parameters
-
+    
     # Minimize both objectives (min -f(x) if maximization is needed)
-    creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))
+    creator.create("FitnessMin", base.Fitness, weights=(1.0, -1.0, 1.))
 
     # Individuals in the generation
     creator.create("Individual", array.array, typecode='d',
@@ -151,7 +153,7 @@ def nsga2_pareto_K(KK, propvec, seed=None):
     #  the algorithm's performance
     #NGEN = 300  # Number of generations
     #MU = 100  # Number of individuals
-    NGEN=300
+    NGEN=100
     MU=100
     CXPB = 0.75  # Cross-over probability, [0,1]
 
@@ -216,6 +218,9 @@ def nsga2_pareto_K(KK, propvec, seed=None):
     print("NSGA done; hof: {}".format(pf[0]))
     print("K = {}; Score: {}".format(KK, -eval_mo(pf[0],propvec,KK)[0]))
     print("pv RON = {}".format(propvec['NAME']))
-    return front[:, 1], -front[:, 0]
+    
+    
+
+    return front # front[:, 1], -front[:, 0], front[:,2]
 
 #    return pop, logbook, hof, pf
