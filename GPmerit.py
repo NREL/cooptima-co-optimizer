@@ -98,7 +98,8 @@ def train_GP(X,y,scaler):
 
     GP = GaussianProcessRegressor(kernel=kernel,n_restarts_optimizer=10,\
         normalize_y=True).fit(X_, y)
-    return GP
+
+    return GP,scaler
 
 def predict_GP(GP,scaler,X):
     """Makes GP prediction on test set"""
@@ -118,7 +119,7 @@ def predict_fuel(dfAll,inputs,output,fuel='E40-TRF71'):
     scaler = preprocessing.StandardScaler().fit(X)
     y = dfOutputs.values
 
-    GP = train_GP(X,y,scaler)
+    GP,scaler = train_GP(X,y,scaler)
 
     Xpred = dfTest[inputs].values
 
