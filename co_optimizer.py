@@ -24,6 +24,7 @@ import sys
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
+import time
 from fuelsdb_interface import load_propDB,\
                               make_property_vector_all_sample_cost
 from fuelsdb_interface import make_property_vector_all 
@@ -60,6 +61,7 @@ def write_composition(f, c, hdr_in=None, prefix=None):
 
 if __name__ == '__main__':
 
+    t0=time.time()
     print ("=================================================================")
     print ("Welcome to the Co-optimizer")
     print ("=================================================================")
@@ -131,8 +133,8 @@ if __name__ == '__main__':
         n = len(cooptimizer_input.KVEC)
         print ("Running {} K values: {}".format(n, cooptimizer_input.KVEC))
         ncomp, spc_names, propvec = make_property_vector_all(propDB)
-        print(spc_names[0:4])
-        dfdf
+        
+        
         if cooptimizer_input.use_pyomo and cooptimizer_input.use_deap_NSGAII:
             print("Choose only 1 optimizer method")
             print("(not use_pyomo and use_deap_NSGAII)!")
@@ -161,9 +163,11 @@ if __name__ == '__main__':
                     print("sample: {}".format(ns))
                     ncomp, spc_names, propvec = make_property_vector_all_sample_cost(propDB)
                     print("Starting optimization")
-                    C, M = run_optmize_nsga2(KK, propvec)
-                    Clist.append(C)
-                    Mlist.append(M)
+                    Front = run_optmize_nsga2(KK, propvec,propDB)
+                    C=Front[:,1]
+                    M = Front[:,0]
+                    Clist.append(Front[:,1])
+                    Mlist.append(Front[:,0])
                     costlist.append(propvec['COST'])
 
             else:
@@ -199,7 +203,7 @@ if __name__ == '__main__':
         print ("Running K vs merit function sweep")
         n = len(cooptimizer_input.KVEC)
         # print ("Running {} K values: {}".format(n, cooptimizer_input.KVEC))
-        ncomp, spc_names, propvec = make_property_vector(propDB)
+        ncomp, spc_names, propvec = make_property_vector_all(propDB)
 
         if cooptimizer_input.use_pyomo and cooptimizer_input.use_deap_NSGAII:
             print("Choose only 1 optimizer method")
@@ -240,7 +244,7 @@ if __name__ == '__main__':
         print ("Running K vs merit function sweep")
         n = cooptimizer_input.nsamples
         
-        ncomp, spc_names, propvec = make_property_vector(propDB)
+        ncomp, spc_names, propvec = make_property_vector_all(propDB)
 
         if cooptimizer_input.use_pyomo and cooptimizer_input.use_deap_NSGAII:
             print("Choose only 1 optimizer method")
@@ -288,7 +292,7 @@ if __name__ == '__main__':
         print ("Running uncertainty propagation")
         n = cooptimizer_input.nsamples
         
-        ncomp, spc_names, propvec = make_property_vector(propDB)
+        ncomp, spc_names, propvec = make_property_vector_all(propDB)
 
         if cooptimizer_input.use_pyomo and cooptimizer_input.use_deap_NSGAII:
             print("Choose only 1 optimizer method")
@@ -308,6 +312,7 @@ if __name__ == '__main__':
             sen_samples[kk] = []
         for kk in cooptimizer_input.ref_mean.keys():
             ref_samples[kk] = []
+
 
         nn = 0
         sen = {}
@@ -331,6 +336,7 @@ if __name__ == '__main__':
                 sen_samples[kk].append(sen[kk])
             for kk in cooptimizer_input.ref_mean.keys():
                 ref_samples[kk].append(ref[kk])
+            #print(ref_samples)
 
 
             if cooptimizer_input.use_pyomo:
@@ -346,6 +352,8 @@ if __name__ == '__main__':
             else:
                 print("No valid optimization algorithm specified")
                 sys.exit(-1)
+        #print(ref_samples['HoV'])
+                
         print ("{}".format(cooptimizer_input.KVEC))
         print ("{}".format(M))  
         with PdfPages(cooptimizer_input.UP_plotfilename) as pdf:
@@ -417,4 +425,6 @@ if __name__ == '__main__':
     for f in output_files:
         print(f)
     print("==================================================================")
+    t1 =time.time()-t0
+    print('Time required:', t1)
     sys.exit(0)

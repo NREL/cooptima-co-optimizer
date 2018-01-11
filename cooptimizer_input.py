@@ -38,13 +38,23 @@ component_max = {}
 # Run a tradeoff analysis between cost and obtainable merit function
 task_list['cost_vs_merit_Pareto'] = False
 
-task_list['cost_vs_merit_Pareto_UP'] = True
+task_list['mean_vs_var_Pareto'] = False
 
 task_list['cost_vs_merit_Pareto_UP_single'] = False
+
+task_list['cost_vs_merit_Pareto_UP'] = False
+
+
 #TODO: work out how to get distribution of merit possible for a given target cost
 #      based on uncertainty in cost properties. Do by sampling. Then we can put in bin+-delta.
+if task_list['cost_vs_merit_Pareto'] or task_list['mean_vs_var_Pareto']:
+	parallel_nsgaruns =True	
 
 
+
+
+else:
+	parallel_nsgaruns =False
 # Run a tradeoff analysis between engine design and obtainable merit function
 task_list['K_vs_merit_sweep'] = False
 
@@ -57,6 +67,7 @@ kmean = 0.5
 kvar = 1.0
 
 # Do uncertainity propagation for uncertainty in merit function
+task_list['UPMO'] = True
 task_list['UP'] = False
 UP_datafilename = 'UP.txt'
 UP_plotfilename = 'UP.pdf'
@@ -72,13 +83,14 @@ sen_mean['PMIFIX'] = 0.67
 sen_mean['PMIVAR'] = 0.5
 
 sen_var = {}
-sen_var['ON']= 1.0/1.6*.1
-sen_var['ONHoV'] = 0.01*.1
-sen_var['HoV'] = 1.0/130.0*.1
-sen_var['SL'] = 1.0/3.0*.1
-sen_var['LFV150'] = 0.1
-sen_var['PMIFIX'] = 0.67*.1
-sen_var['PMIVAR'] = 0.5*.1
+mul = 0.1 #orig: .1
+sen_var['ON']= 1.0/1.6*mul
+sen_var['ONHoV'] = 0.01*mul
+sen_var['HoV'] = 1.0/130.0*mul
+sen_var['SL'] = 1.0/3.0*mul
+sen_var['LFV150'] = mul
+sen_var['PMIFIX'] = 0.67*mul
+sen_var['PMIVAR'] = 0.5*mul
 
 # Coefficients in merit function indicating reference fuel properties
 ref_mean = {}
@@ -89,11 +101,12 @@ ref_mean['SL'] = 46.0
 ref_mean['PMI'] = 2.0
 
 ref_var = {}
-ref_var['RON'] = 8.0
-ref_var['S'] = 10.0
-ref_var['HoV'] = 20.0
-ref_var['SL'] = 2.0
-ref_var['PMI'] = 2.0
+tul = 1
+ref_var['RON'] = 8.0*tul
+ref_var['S'] = 10.0*tul
+ref_var['HoV'] = 20.0*tul
+ref_var['SL'] = 2.0*tul
+ref_var['PMI'] = 2.0*tul
 
 # Find the composition that maximizes the merit function subject to constraints
 # below - NOT YET IMPLEMENTED,  PLACEHOLDER FOR FUTURE DEV
@@ -123,6 +136,16 @@ component_cost_database = 'cost_db_AMR_OG.xlsx'
 cost_vs_merit_datafilename = "cost_merit_pareto.txt"#for pyomo
 cost_vs_merit_plotfilename = "cost_merit_pareto"
 
+
+mean_vs_var_merit_plotfilename = "mean_var_merit_pareto"
+mean_vs_var_merit_datafilename = "mean_var_merit_pareto.txt"#for pyomo
+
+cost_vs_merit_Pareto_UP_single_plotfilename = "UPsingle_cost_vs_merit_pareto"
+cost_vs_merit_Pareto_UP_single_datafilename = "UPsingle_cost_vs_merit_pareto.txt"
+
+cost_vs_merit_Pareto_UP_plotfilename = "UP_cost_vs_merit_pareto"
+cost_vs_merit_Pareto_UP_datafilename = "UP_cost_vs_merit_pareto.txt"
+
 k_sweep_datafilename = "ksweep.txt"
 k_sweep_plotfilename = "ksweep.pdf"
 # -----------------------------------------------------------------------------
@@ -142,7 +165,7 @@ k_sweep_plotfilename = "ksweep.pdf"
 #KVEC = [-2.0, -1.5, -1.0,-0.5, 0.5,  1.0, 1.5,2.0,2.5,3.0,3.5,4.0] #-vector
 #KVEC = [-2.0, 0.5,  1.0]  # -vector
 #KVEC = [-2.0, -1.25, -0.5]  # -vector
-KVEC = [-1., 1., 2., 3., 4.]  # -vector
+KVEC = [-2., -1., 1., 2., 3., 4.]  # -vector
 
 
 # -----------------------------------------------------------------------------

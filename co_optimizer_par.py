@@ -25,11 +25,12 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 import copy
+import time
 
 from fuelsdb_interface import load_propDB,\
                               make_property_vector_all_sample_cost,\
                               make_property_vector_all_sample_cost_UP_single
-from fuelsdb_interface import make_property_vector_all 
+from fuelsdb_interface import make_property_vector_all, make_property_vector 
 from optimizer import run_optimize_vs_C as run_optimize_pyomo_C,\
                       comp_to_cost_mmf, comp_to_mmf,\
                       run_optimize_vs_K as run_optimize_pyomo_K
@@ -49,35 +50,17 @@ mrk = ['o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'x', 'x', 'x', 'x', 'x']
 #-----------------------------------
 def wrapper_func((n,varID,propDB, KK)):
     np.random.seed(n)
-    print(n)
-    #   KK=-1.25
     ncomp, spc_names, propvec = make_property_vector_all_sample_cost_UP_single(propDB, change_name)
-    print(spc_names)
-    #for kk in range(22):
-    #    print(spids[kk], propvec['COST'][kk])
-    #print("Starting optimization")
-    #C, M = run_optmize_nsga2(KK, propvec)
-
-    #return C,M,propvec, spc_names
-    Pfront = run_optmize_nsga2(KK, propvec) #Pfront = [-merit, cost, obj3]
+    Pfront = run_optmize_nsga2(KK, propvec, propDB) #Pfront = [-merit, cost, obj3]
     return Pfront, propvec, spc_names
 
 
 def wrapper_func_all((n,propDB, KK)):
     np.random.seed(n)
-    print(n)
-    #   KK=-1.25
     ncomp, spc_names, propvec = make_property_vector_all_sample_cost(propDB)
-    print(spc_names)
-    #for kk in range(22):
-    #    print(spids[kk], propvec['COST'][kk])
-    #print("Starting optimization")
-    #C, M = run_optmize_nsga2(KK, propvec)
-    #return C,M,propvec, spc_names
-    
-
-    Pfront = run_optmize_nsga2(KK, propvec) #Pfront = [-merit, cost, obj3]
+    Pfront = run_optmize_nsga2(KK, propvec, propDB) #Pfront = [-merit, cost, obj3]
     return Pfront, propvec, spc_names
+
 
 def write_composition(f, c, hdr_in=None, prefix=None):
     vals = ""
@@ -100,7 +83,7 @@ def write_composition(f, c, hdr_in=None, prefix=None):
 
 
 if __name__ == '__main__':
-
+    t0=time.time()
     print ("=================================================================")
     print ("Welcome to the Co-optimizer")
     print ("=================================================================")
@@ -130,16 +113,17 @@ if __name__ == '__main__':
         plt.close()
         compfile = open(cooptimizer_input.cost_vs_merit_datafilename, 'w')
         print ("Running cost vs merit function Pareto front analysis")
-        n = len(cooptimizer_input.KVEC)
-        print ("Running {} K values: {}".format(n, cooptimizer_input.KVEC))
+        nK = len(cooptimizer_input.KVEC)
+        print ("Running {} K values: {}".format(nK, cooptimizer_input.KVEC))
         ncomp, spc_names, propvec = make_property_vector_all(propDB)
 
         if cooptimizer_input.use_pyomo and cooptimizer_input.use_deap_NSGAII:
             print("Choose only 1 optimizer method")
             print("(not use_pyomo and use_deap_NSGAII)!")
             sys.exit(-2)
-        for KK, col, mk in zip(cooptimizer_input.KVEC, clr[0:n+1], mrk[0:n+1]):
+        for KK, col, mk in zip(cooptimizer_input.KVEC, clr[0:nK+1], mrk[0:nK+1]):
             if cooptimizer_input.use_pyomo:
+                sys.exit(-2)
                 C = []
                 M = []
                 compfile.write("K = {}-------------------------\n".format(KK))
@@ -152,27 +136,103 @@ if __name__ == '__main__':
                         write_composition(compfile, comp)
                 compfile.write("\n")
             elif cooptimizer_input.use_deap_NSGAII:
-                C, M = run_optmize_nsga2(KK, propvec)
+                front = run_optmize_nsga2(KK, propvec, propDB)
             else:
                 print("No valid optimization algorithm specified")
                 sys.exit(-1)
-            plt.scatter(C, M, label="K={}".format(KK), marker=mk, color=col)
-            plt.xlabel('Cost')
-            plt.ylabel('Merit')
-        plt.legend(loc=8, ncol=3, fontsize=10)
-        plt.title("Co-Optimizer GA Pareto Front")
-        plt.savefig(cooptimizer_input.cost_vs_merit_plotfilename, form='pdf')
-        output_files.append(cooptimizer_input.cost_vs_merit_plotfilename)
-        output_files.append(cooptimizer_input.cost_vs_merit_datafilename)
+
+            st1 = '{}'
+            for stc in range(front.shape[1]-1):
+                st1=st1+',{}'
+            st1 = st1+'\n'
+            pareto_txt = 'sampling_pareto_merit_cost_K_'+str(KK)+'.txt'
+            output_files.append(pareto_txt)
+            spdfile = open(pareto_txt,'w') 
+            for lin in range(front.shape[0]):
+                f_write = list()
+                for addf in range(front.shape[1]):
+                    f_write.append(front[lin, addf])
+                spdfile.write(st1.format(*tuple(f_write)))
+            spdfile.close()
+                
+            if front.shape[1]==2: #make scatter plot if we have only 2 objectives    
+                plt.scatter(front[:,0], front[:,1], label="K={}".format(KK), marker=mk, color=col)
+                plt.xlabel('Merit')
+                plt.ylabel('Cost')
+
+        if front.shape[1]==2:        
+            plt.legend(loc=8, ncol=3, fontsize=10)
+            plt.title("Co-Optimizer GA Pareto Front")
+            plt.savefig(cooptimizer_input.cost_vs_merit_plotfilename, form='pdf')
+            output_files.append(cooptimizer_input.cost_vs_merit_plotfilename)
+        #output_files.append(cooptimizer_input.cost_vs_merit_datafilename)
+
+    if cooptimizer_input.task_list['mean_vs_var_Pareto']:
+        plt.close()
+        compfile = open(cooptimizer_input.mean_vs_var_merit_datafilename, 'w')
+        print ("Running merit mean vs merit variance multiobjective analysis")
+        nK = len(cooptimizer_input.KVEC)
+        print ("Running {} K values: {}".format(nK, cooptimizer_input.KVEC))
+        ncomp, spc_names, propvec = make_property_vector_all(propDB)
+
+        if cooptimizer_input.use_pyomo and cooptimizer_input.use_deap_NSGAII:
+            print("Choose only 1 optimizer method")
+            print("(not use_pyomo and use_deap_NSGAII)!")
+            sys.exit(-2)
+        for KK, col, mk in zip(cooptimizer_input.KVEC, clr[0:nK+1], mrk[0:nK+1]):
+            if cooptimizer_input.use_pyomo:
+                sys.exit(-2)
+                C = []
+                M = []
+                compfile.write("K = {}-------------------------\n".format(KK))
+                for cs in np.linspace(1.5, 15.0, 15):
+                    comp, isok = run_optimize_pyomo_C(cs, KK, propDB)
+                    if (isok):
+                        c, m = comp_to_cost_mmf(comp, propDB, KK)
+                        C.append(c)
+                        M.append(m)
+                        write_composition(compfile, comp)
+                compfile.write("\n")
+            elif cooptimizer_input.use_deap_NSGAII:
+                front = run_optmize_nsga2(KK, propvec, propDB)
+
+            else:
+                print("No valid optimization algorithm specified")
+                sys.exit(-1)
+
+            st1 = '{}'
+            for stc in range(front.shape[1]-1):
+                st1=st1+',{}'
+            st1 = st1+'\n'
+            pareto_txt = 'sampling_pareto_mean_var_K_'+str(KK)+'.txt'
+            output_files.append(pareto_txt)
+            spdfile = open(pareto_txt,'w') 
+            for lin in range(front.shape[0]):
+                f_write = list()
+                for addf in range(front.shape[1]):
+                    f_write.append(front[lin, addf])
+                spdfile.write(st1.format(*tuple(f_write)))
+            spdfile.close()
+                
+            if front.shape[1]==2: #make scatter plot if we have only 2 objectives    
+                plt.scatter(front[:,0], front[:,1], label="K={}".format(KK), marker=mk, color=col)
+                plt.xlabel('Merit mean (maximize)')
+                plt.ylabel('Merit variance (minimize)')
+
+        if front.shape[1]==2:        
+            plt.legend(loc=8, ncol=3, fontsize=10)
+            plt.title("Co-Optimizer GA Pareto Front")
+            plt.savefig(cooptimizer_input.mean_vs_var_merit_plotfilename, form='pdf')
+            output_files.append(cooptimizer_input.mean_vs_var_merit_plotfilename)  
 
     # UQ for individual cost components (assuming uncertainty in only a single component while all others are deterministic)
     if cooptimizer_input.task_list['cost_vs_merit_Pareto_UP_single']:
         plt.close()
 
-        compfile = open(cooptimizer_input.cost_vs_merit_datafilename, 'w')
-        print ("Running cost vs merit function Pareto front analysis with sampling")
-        n = len(cooptimizer_input.KVEC)
-        print ("Running {} K values: {}".format(n, cooptimizer_input.KVEC))
+        compfile = open(cooptimizer_input.cost_vs_merit_Pareto_UP_single_datafilename, 'w')
+        print ("Running cost vs merit function Pareto front analysis with sampling of individual cost components")
+        nK = len(cooptimizer_input.KVEC)
+        print ("Running {} K values: {}".format(nK, cooptimizer_input.KVEC))
         ncomp, init_names, propvec = make_property_vector_all(propDB)
         
         printed = False
@@ -180,7 +240,7 @@ if __name__ == '__main__':
             print("Choose only 1 optimizer method")
             print("(not use_pyomo and use_deap_NSGAII)!")
             sys.exit(-2)
-        for KK, col, mk in zip(cooptimizer_input.KVEC, clr[0:n+1], mrk[0:n+1]):
+        for KK, col, mk in zip(cooptimizer_input.KVEC, clr[0:nK+1], mrk[0:nK+1]):
             if cooptimizer_input.use_pyomo:
                 print("Not yet implemented using PyOmo")
                 sys.exit(-1)
@@ -198,37 +258,24 @@ if __name__ == '__main__':
 
             elif cooptimizer_input.use_deap_NSGAII:
                 for varID in range(ncomp):
-                    #Clist = []
-                    #Mlist = []
                     costlist = []
                     Front = []
                     change_name = init_names[varID]
                     
                     print('sampling ', change_name)
-                    #ncomp, spc_names, propvec = make_property_vector_all_sample_cost_UP_single(propDB, varID)
-                    #print("Starting optimization")
-                    #C, M = run_optmize_nsga2(KK, propvec)
 
                     pool = Pool()
                     pool_res = pool.map_async(wrapper_func, ((ns, change_name, propDB, KK) for ns in range(cooptimizer_input.nsamples)))
                     result = pool_res.get()
-                    
+                    pool.close()
                     for ns in range(cooptimizer_input.nsamples):
                         Front.append(result[ns][0])
                         costlist.append(result[ns][1]['COST'])
-                        xnames=result[ns][2]
-                        #Clist.append(result[ns][0])
-                        #Mlist.append(result[ns][1])
-                        #costlist.append(result[ns][2]['COST'])
-                        #xnames=result[ns][3]
-                    
-                    #Clist.append(C)
-                    #Mlist.append(M)
-                    #costlist.append(propvec['COST'])   
+                        xnames=result[ns][2] 
                     spc_names =xnames
 
-                    pareto_txt = 'sampling_pareto_data_'+change_name+'_K_'+str(KK)+'.txt'
-                    
+                    pareto_txt = 'merit_cost_pareto_data_'+change_name+'_K_'+str(KK)+'.txt'
+                    output_files.append(pareto_txt)
                     spdfile = open(pareto_txt,'w')
 
                     madeplot = False
@@ -246,29 +293,22 @@ if __name__ == '__main__':
                             spdfile.write(st1.format(*tuple(f_write))) #f[0][lin,0], f[0][lin,1],f[0][lin,2]))
                             #spdfile.write("{},{}\n".format(f[0][lin,0], f[0][lin,1]))
                         if f[0].shape[1] == 2:
-                            plt.scatter(f[0][:,0], f[0][:,1], label="K={}".format(KK), marker='.')
-                            plt.xlabel('Objective 1')
-                            plt.ylabel('Objective 2')
-                    '''
-                    for C,M in zip(Clist,Mlist):
-                        for c,m in zip(C,M):
-                            spdfile.write("{},{}\n".format(c,m))
-                        plt.scatter(C, M, label="K={}".format(KK), marker='.')
-                        plt.xlabel('Cost')
-                        plt.ylabel('Merit')
-                        plt.title("{}".format(change_name))
-                    '''
+                            plt.scatter(f[0][:,0], f[0][:,1],  marker='.')
+                            plt.xlabel('Merit (maximize)')
+                            plt.ylabel('Cost (minimize)')
+                            madeplot = True
+
                     spdfile.close()
 
                     if madeplot:
-                        pltname = cooptimizer_input.cost_vs_merit_plotfilename+'_'+change_name+'_K_'+str(KK)+'.pdf'
+                        plt.legend(loc=8, ncol=3, fontsize=10)
+                        plt.title("Co-Optimizer GA Pareto Front")
+                        pltname = cooptimizer_input.cost_vs_merit_Pareto_UP_single_plotfilename+'_'+change_name+'_K_'+str(KK)+'.pdf'
+                        output_files.append(pltname)
                         plt.savefig(pltname, form='pdf')
                         plt.close()
-                    #plt.legend(loc=8, ncol=3, fontsize=10)
-                    #pltname = cooptimizer_input.cost_vs_merit_plotfilename+'_'+change_name+'_K_'+str(KK)+'.pdf'
-                    #plt.savefig(pltname, form='pdf')
+                    
                     costarray = np.array(costlist)
-                    #plt.close()
                     filename = 'cost_samples_'+change_name+'_K_'+str(KK)+'.pdf'
                     with PdfPages(filename) as pdf:
                         for i in range(costarray.shape[1]):
@@ -276,9 +316,8 @@ if __name__ == '__main__':
                             plt.xlabel("{}".format(spc_names[i]))
                             pdf.savefig()
                             plt.close()
+                    output_files.append(filename)
                     printed = True
-                    output_files.append(cooptimizer_input.cost_vs_merit_plotfilename)
-                    output_files.append(cooptimizer_input.cost_vs_merit_datafilename)
 
             else:
                 print("No valid optimization algorithm specified")
@@ -304,23 +343,23 @@ if __name__ == '__main__':
     #Ray's stuff
     if cooptimizer_input.task_list['cost_vs_merit_Pareto_UP']:
         plt.close()
-        compfile = open(cooptimizer_input.cost_vs_merit_datafilename, 'w')
-        print ("Running cost vs merit function Pareto front analysis with sampling")
-        n = len(cooptimizer_input.KVEC)
-        print ("Running {} K values: {}".format(n, cooptimizer_input.KVEC))
+        compfile = open(cooptimizer_input.cost_vs_merit_Pareto_UP_datafilename, 'w')
+        print ("Running cost vs merit function Pareto front analysis with sampling of all cost components")
+        nK = len(cooptimizer_input.KVEC)
+        print ("Running {} K values: {}".format(nK, cooptimizer_input.KVEC))
         ncomp, spc_names, propvec = make_property_vector_all(propDB)
 
         if cooptimizer_input.use_pyomo and cooptimizer_input.use_deap_NSGAII:
             print("Choose only 1 optimizer method")
             print("(not use_pyomo and use_deap_NSGAII)!")
             sys.exit(-2)
-        for KK, col, mk in zip(cooptimizer_input.KVEC, clr[0:n+1], mrk[0:n+1]):
+        for KK, col, mk in zip(cooptimizer_input.KVEC, clr[0:nK+1], mrk[0:nK+1]):
             if cooptimizer_input.use_pyomo:
                 print("Not yet implemented using PyOmo")
                 sys.exit(-1)
                 C = []
                 M = []
-                compfile.write("K = {}-------------------------\n".format(KK))
+                comppfile.write("K = {}-------------------------\n".format(KK))
                 for cs in np.linspace(1.5, 15.0, 15):
                     comp, isok = run_optimize_pyomo_C(cs, KK, propDB)
                     if (isok):
@@ -331,31 +370,23 @@ if __name__ == '__main__':
                 compfile.write("\n")
 
             elif cooptimizer_input.use_deap_NSGAII:
-                #Clist = []
-                #Mlist = []
                 costlist = []
                 Front = []
-
                 pool = Pool()
                 pool_res = pool.map_async(wrapper_func_all, ((ns, propDB, KK) for ns in range(cooptimizer_input.nsamples)))
                 result = pool_res.get()
-                #result = [pfront, costlist, xnames]
+                pool.close()
                 for ns in range(cooptimizer_input.nsamples):
                     Front.append(result[ns][0])
                     costlist.append(result[ns][1]['COST'])
                     xnames=result[ns][2]
-                    #Clist.append(result[ns][0])
-                    #Mlist.append(result[ns][1])
-                    #costlist.append(result[ns][2]['COST'])
-                    #xnames=result[ns][3]
-                    
                     
                 spc_names =xnames
             else:
                 print("No valid optimization algorithm specified")
                 sys.exit(-1)
 
-            pareto_txt = 'sampling_pareto_data_all_K_'+str(KK)+'.txt'
+            pareto_txt = 'merit_cost_pareto_data_all_K'+str(KK)+'.txt'
             spdfile = open(pareto_txt,'w')
             #spdfile = open('sampling_pareto_data_UP_all.txt','w')
             madeplot = False
@@ -363,35 +394,30 @@ if __name__ == '__main__':
             for stc in range(Front[0].shape[1]-1):
                 st1=st1+',{}'
             st1 = st1+'\n'
-
+            
             for f in zip(Front):
                 for lin in range(f[0].shape[0]):
                     f_write = list()
                     for addf in range(f[0].shape[1]):
                         f_write.append(f[0][lin, addf])
-
                     spdfile.write(st1.format(*tuple(f_write))) #f[0][lin,0], f[0][lin,1],f[0][lin,2]))
                     #spdfile.write("{},{}\n".format(f[0][lin,0], f[0][lin,1]))
                 if f[0].shape[1] == 2:
-                    plt.scatter(f[0][:,0], f[0][:,1], label="K={}".format(KK), marker='.')
-                    plt.xlabel('Objective 1')
-                    plt.ylabel('Objective 2')
+                    plt.scatter(f[0][:,0], f[0][:,1], marker='.')
+                    plt.xlabel('Merit (maximize)')
+                    plt.ylabel('Cost (minimize)')
                     madeplot = True
-            '''
-            for C,M in zip(Clist,Mlist):
-                for c,m in zip(C,M):
-                    spdfile.write("{},{}\n".format(c,m))
-                plt.scatter(C, M, label="K={}".format(KK), marker='.')
-                plt.xlabel('Cost')
-                plt.ylabel('Merit')
-            '''
-
             spdfile.close()
+            output_files.append(pareto_txt)
 
             if madeplot:
-                pltname = cooptimizer_input.cost_vs_merit_plotfilename+'_K_'+str(KK)+'.pdf'
+                plt.legend(loc=8, ncol=3, fontsize=10)
+                plt.title("Co-Optimizer GA Pareto Front")
+                pltname = cooptimizer_input.cost_vs_merit_Pareto_UP_plotfilename+'_K_'+str(KK)+'.pdf'
+                output_files.append(pltname)
                 plt.savefig(pltname, form='pdf')
                 plt.close()
+
             filename = 'cost_samples_K_'+str(KK)+'.pdf'
             costarray = np.array(costlist)
             with PdfPages(filename) as pdf:
@@ -400,14 +426,13 @@ if __name__ == '__main__':
                     plt.xlabel("{}".format(spc_names[i]))
                     pdf.savefig()
                     plt.close()
+            output_files.append(filename)        
             printed = True
-            output_files.append(cooptimizer_input.cost_vs_merit_plotfilename)
-            output_files.append(cooptimizer_input.cost_vs_merit_datafilename)
       
         
-        if not(printed):
+        if not(printed):#this needs to be updated (only active when pyomo is used)
             #plt.legend(loc=8, ncol=3, fontsize=10)
-            plt.savefig(cooptimizer_input.cost_vs_merit_plotfilename, form='pdf')
+            plt.savefig(cooptimizer_input.cost_vs_merit_Pareto_UP_plotfilename+'_K_'+str(KK)+'.pdf')
             costarray = np.array(costlist)
             plt.close()
             with PdfPages('cost_samples.pdf') as pdf:
@@ -416,8 +441,6 @@ if __name__ == '__main__':
                     plt.xlabel("{}".format(spc_names[i]))
                     pdf.savefig()
                     plt.close()
-        
-          
             output_files.append(cooptimizer_input.cost_vs_merit_plotfilename)
             output_files.append(cooptimizer_input.cost_vs_merit_datafilename)
 
@@ -428,7 +451,7 @@ if __name__ == '__main__':
         print ("Running K vs merit function sweep")
         n = len(cooptimizer_input.KVEC)
         # print ("Running {} K values: {}".format(n, cooptimizer_input.KVEC))
-        ncomp, spc_names, propvec = make_property_vector(propDB)
+        ncomp, spc_names, propvec = make_property_vector_all(propDB)
 
         if cooptimizer_input.use_pyomo and cooptimizer_input.use_deap_NSGAII:
             print("Choose only 1 optimizer method")
@@ -511,13 +534,57 @@ if __name__ == '__main__':
         output_files.append(cooptimizer_input.k_sampling_plotfilename)
         output_files.append(cooptimizer_input.k_sampling_datafilename)
     
+    if cooptimizer_input.task_list['UPMO']:
+        plt.close()
+        compfile = open(cooptimizer_input.mean_vs_var_merit_datafilename, 'w')
+        print ("Running uncertainty propagation")
+        n = cooptimizer_input.nsamples
+        nK = len(cooptimizer_input.KVEC)
+        for KK, col, mk in zip(cooptimizer_input.KVEC, clr[0:nK+1], mrk[0:nK+1]):    
+            ncomp, spc_names, propvec = make_property_vector_all(propDB)#make_property_vector
+
+            if cooptimizer_input.use_pyomo and cooptimizer_input.use_deap_NSGAII:
+                print("Choose only 1 optimizer method")
+                print("(not use_pyomo and use_deap_NSGAII)!")
+                sys.exit(-2)
+
+            if cooptimizer_input.use_deap_NSGAII:
+                print("Using NSGAII for optimization")
+                front = run_optmize_nsga2(KK, propvec, propDB)#,  sen=sen_samples, ref=ref_samples) #first output is merit, second is variance
+                print(front)
+                print(front.shape, type(front))
+                np.savetxt('Paretofront.txt', front)
+                plt.scatter(front[:,0], front[:,1], label="K={}".format(KK), marker=mk, color=col)
+            
+            st1 = '{}'
+            for stc in range(front.shape[1]-1):
+                st1=st1+',{}'
+            st1 = st1+'\n'
+            pareto_txt = 'sampling_pareto_data_mean_var_K_'+str(KK)+'.txt'
+            spdfile = open(pareto_txt,'w') 
+            for lin in range(front.shape[0]):
+                f_write = list()
+                for addf in range(front.shape[1]):
+                    f_write.append(front[lin, addf])
+                spdfile.write(st1.format(*tuple(f_write)))
+            spdfile.close()
+
+        plt.xlabel('Maximize expected merit value')
+        plt.ylabel('Minimize the merit variance')
+        plt.legend(loc=2, ncol=3, fontsize=10)
+        plt.title("Co-Optimizer NSGAII Pareto Front")
+        plt.savefig(cooptimizer_input.mean_vs_var_merit_plotfilename+'.pdf')
+        output_files.append(cooptimizer_input.mean_vs_var_merit_plotfilename)
+        output_files.append(cooptimizer_input.mean_vs_var_merit_datafilename)
+
+
     if cooptimizer_input.task_list['UP']:
         plt.close()
         compfile = open(cooptimizer_input.UP_datafilename, 'w')
         print ("Running uncertainty propagation")
         n = cooptimizer_input.nsamples
         
-        ncomp, spc_names, propvec = make_property_vector(propDB)
+        ncomp, spc_names, propvec = make_property_vector_all(propDB)
 
         if cooptimizer_input.use_pyomo and cooptimizer_input.use_deap_NSGAII:
             print("Choose only 1 optimizer method")
@@ -526,7 +593,7 @@ if __name__ == '__main__':
 
         if cooptimizer_input.use_deap_NSGAII:
             print("Not yet implemented using NSGAII")
-            sys.exit(-1)
+            #sys.exit(-1)
 
         KK = cooptimizer_input.KVEC[0]
         M = []
@@ -537,6 +604,7 @@ if __name__ == '__main__':
             sen_samples[kk] = []
         for kk in cooptimizer_input.ref_mean.keys():
             ref_samples[kk] = []
+
 
         nn = 0
         sen = {}
@@ -561,7 +629,6 @@ if __name__ == '__main__':
             for kk in cooptimizer_input.ref_mean.keys():
                 ref_samples[kk].append(ref[kk])
 
-
             if cooptimizer_input.use_pyomo:
                 comp, isok = run_optimize_pyomo_K(KK, propDB, ref=ref, sen=sen)
                 if (isok):
@@ -571,10 +638,11 @@ if __name__ == '__main__':
                     M.append(m)
                     print ("sample m = {}".format(m))
             elif cooptimizer_input.use_deap_NSGAII:
-                C, M = run_optmize_nsga2(KK, propvec)
+                C, M = run_optmize_nsga2(KK, propvec,propDB)
             else:
                 print("No valid optimization algorithm specified")
                 sys.exit(-1)
+                
         print ("{}".format(cooptimizer_input.KVEC))
         print ("{}".format(M))  
         with PdfPages(cooptimizer_input.UP_plotfilename) as pdf:
@@ -641,9 +709,15 @@ if __name__ == '__main__':
 
         output_files.append(cooptimizer_input.UP_plotfilename)
         output_files.append(cooptimizer_input.UP_datafilename)
+        
+
+
+
     print("==================================================================")
     print("Analysis completed; new output files")
     for f in output_files:
         print(f)
     print("==================================================================")
+    t1 = time.time()-t0
+    print('time needed:',t1)
     sys.exit(0)
