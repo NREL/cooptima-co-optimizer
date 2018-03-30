@@ -45,12 +45,14 @@ from multiprocessing import Pool
 import random
 #-----------------------------------
 clr = ['fuchsia', 'b', 'g', 'r', 'y', 'm', 'c', 'k', 'g', 'r', 'y', 'm']
-mrk = ['o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'x', 'x', 'x', 'x', 'x']
+mrk = ['o', 'x', 's', '^', '<', '*', 'o', 'o', 'x', 'x', 'x', 'x', 'x']
 
 #-----------------------------------
 def wrapper_func((n,varID,propDB, KK)):
     np.random.seed(n)
     ncomp, spc_names, propvec = make_property_vector_all_sample_cost_UP_single(propDB, change_name)
+    #print(propvec['COST'], ncomp)
+    
     Pfront = run_optmize_nsga2(KK, propvec, propDB) #Pfront = [-merit, cost, obj3]
     return Pfront, propvec, spc_names
 
@@ -59,6 +61,9 @@ def wrapper_func_all((n,propDB, KK)):
     np.random.seed(n)
     ncomp, spc_names, propvec = make_property_vector_all_sample_cost(propDB)
     Pfront = run_optmize_nsga2(KK, propvec, propDB) #Pfront = [-merit, cost, obj3]
+
+    
+
     return Pfront, propvec, spc_names
 
 
@@ -136,6 +141,7 @@ if __name__ == '__main__':
                         write_composition(compfile, comp)
                 compfile.write("\n")
             elif cooptimizer_input.use_deap_NSGAII:
+                
                 front = run_optmize_nsga2(KK, propvec, propDB)
             else:
                 print("No valid optimization algorithm specified")
@@ -145,7 +151,7 @@ if __name__ == '__main__':
             for stc in range(front.shape[1]-1):
                 st1=st1+',{}'
             st1 = st1+'\n'
-            pareto_txt = 'sampling_pareto_merit_cost_K_'+str(KK)+'.txt'
+            pareto_txt = 'poster_pareto_MMF_GPrejectoutsider_K_'+str(KK)+'.txt'
             output_files.append(pareto_txt)
             spdfile = open(pareto_txt,'w') 
             for lin in range(front.shape[0]):
@@ -156,13 +162,21 @@ if __name__ == '__main__':
             spdfile.close()
                 
             if front.shape[1]==2: #make scatter plot if we have only 2 objectives    
-                plt.scatter(front[:,0], front[:,1], label="K={}".format(KK), marker=mk, color=col)
-                plt.xlabel('Merit')
-                plt.ylabel('Cost')
+                fig = plt.figure(figsize=(10,8))
+                #plt.scatter(front[:,0], front[:,1], label="K={}".format(KK), marker=mk, color=col)
+                plt.scatter(front[:,0], front[:,1],  marker=mk, color=col)
+                #plt.ylabel('Min Std')
+                plt.xlabel('Maximize MMF')
+                plt.ylabel('Maximize NMEP')
+                #plt.xlabel('Maximize mean NMEP')
+                #plt.ylabel('Minimize variance NMEP')
 
         if front.shape[1]==2:        
-            plt.legend(loc=8, ncol=3, fontsize=10)
-            plt.title("Co-Optimizer GA Pareto Front")
+            plt.legend(loc=1, ncol=1, fontsize=20)
+            #plt.title("Co-Optimizer NSGA2 MMF vs cost")
+            ax = plt.gca()
+            ax.ticklabel_format(style = 'plain', axis ='both')
+            ax.ticklabel_format(useOffset=False, style='plain')
             plt.savefig(cooptimizer_input.cost_vs_merit_plotfilename, form='pdf')
             output_files.append(cooptimizer_input.cost_vs_merit_plotfilename)
         #output_files.append(cooptimizer_input.cost_vs_merit_datafilename)
@@ -271,6 +285,7 @@ if __name__ == '__main__':
                     for ns in range(cooptimizer_input.nsamples):
                         Front.append(result[ns][0])
                         costlist.append(result[ns][1]['COST'])
+                        
                         xnames=result[ns][2] 
                     spc_names =xnames
 
@@ -309,7 +324,7 @@ if __name__ == '__main__':
                         plt.close()
                     
                     costarray = np.array(costlist)
-                    filename = 'cost_samples_'+change_name+'_K_'+str(KK)+'.pdf'
+                    filename = 'cost_samples_'+change_name+'_K_'+str(KK)+'ln.pdf'
                     with PdfPages(filename) as pdf:
                         for i in range(costarray.shape[1]):
                             plt.hist(costarray[:,i])
@@ -380,6 +395,30 @@ if __name__ == '__main__':
                     Front.append(result[ns][0])
                     costlist.append(result[ns][1]['COST'])
                     xnames=result[ns][2]
+
+                    pareto_txt = 'merit_cost_pareto_data_all_K'+str(KK)+'_sample_'+str(ns)+'.txt'
+                    spdfile = open(pareto_txt,'w')
+                    #spdfile = open('sampling_pareto_data_UP_all.txt','w')
+                    madeplot = False
+                    st1 = '{}'
+                    for stc in range(Front[0].shape[1]-1):
+                        st1=st1+',{}'
+                    st1 = st1+'\n'
+                            
+                    for f in zip(Front):
+                        for lin in range(f[0].shape[0]):
+                            f_write = list()
+                            for addf in range(f[0].shape[1]):
+                                f_write.append(f[0][lin, addf])
+                            spdfile.write(st1.format(*tuple(f_write))) #f[0][lin,0], f[0][lin,1],f[0][lin,2]))
+                            #spdfile.write("{},{}\n".format(f[0][lin,0], f[0][lin,1]))
+                        #if f[0].shape[1] == 2:
+                        #    plt.scatter(f[0][:,0], f[0][:,1], marker='.')
+                        #    plt.xlabel('Merit (maximize)')
+                        #    plt.ylabel('Cost (minimize)')
+                        #    madeplot = True
+                    spdfile.close()
+
                     
                 spc_names =xnames
             else:
@@ -411,7 +450,7 @@ if __name__ == '__main__':
             output_files.append(pareto_txt)
 
             if madeplot:
-                plt.legend(loc=8, ncol=3, fontsize=10)
+                plt.legend(loc=8, ncol=3, fontsize=12)
                 plt.title("Co-Optimizer GA Pareto Front")
                 pltname = cooptimizer_input.cost_vs_merit_Pareto_UP_plotfilename+'_K_'+str(KK)+'.pdf'
                 output_files.append(pltname)
@@ -553,14 +592,14 @@ if __name__ == '__main__':
                 front = run_optmize_nsga2(KK, propvec, propDB)#,  sen=sen_samples, ref=ref_samples) #first output is merit, second is variance
                 print(front)
                 print(front.shape, type(front))
-                np.savetxt('Paretofront.txt', front)
+                np.savetxt('Paretofront_UPMO.txt', front)
                 plt.scatter(front[:,0], front[:,1], label="K={}".format(KK), marker=mk, color=col)
             
             st1 = '{}'
             for stc in range(front.shape[1]-1):
                 st1=st1+',{}'
             st1 = st1+'\n'
-            pareto_txt = 'sampling_pareto_data_mean_var_K_'+str(KK)+'.txt'
+            pareto_txt = 'sampling_pareto_uncertfuelprop_mean_var_K_'+str(KK)+'.txt'
             spdfile = open(pareto_txt,'w') 
             for lin in range(front.shape[0]):
                 f_write = list()
@@ -569,11 +608,11 @@ if __name__ == '__main__':
                 spdfile.write(st1.format(*tuple(f_write)))
             spdfile.close()
 
-        plt.xlabel('Maximize expected merit value')
-        plt.ylabel('Minimize the merit variance')
+        plt.xlabel('Maximize expected MMF value')
+        plt.ylabel('Minimize MMF variance')
         plt.legend(loc=2, ncol=3, fontsize=10)
-        plt.title("Co-Optimizer NSGAII Pareto Front")
-        plt.savefig(cooptimizer_input.mean_vs_var_merit_plotfilename+'.pdf')
+        #plt.title("Co-Optimizer NSGAII Pareto Front")
+        plt.savefig(cooptimizer_input.mean_vs_var_merit_plotfilename+'_ln.pdf')
         output_files.append(cooptimizer_input.mean_vs_var_merit_plotfilename)
         output_files.append(cooptimizer_input.mean_vs_var_merit_datafilename)
 
@@ -638,7 +677,7 @@ if __name__ == '__main__':
                     M.append(m)
                     print ("sample m = {}".format(m))
             elif cooptimizer_input.use_deap_NSGAII:
-                C, M = run_optmize_nsga2(KK, propvec,propDB)
+                front = run_optmize_nsga2(KK, propvec,propDB)
             else:
                 print("No valid optimization algorithm specified")
                 sys.exit(-1)

@@ -28,6 +28,8 @@ import numpy as np
 import xlrd
 import xlwt
 import sys
+import math
+import scipy.stats as stats
 
 def ResizeList(l, size, fill_with=None):
     l += [fill_with]*(size-len(l))
@@ -89,8 +91,37 @@ def make_property_vector_all_sample_cost(propDB):
                 while True:
                     if propDB[spids[i]]['COSTVAR'] >0:
                         #print(spids[i])
-                        propvec['COST'][i] = np.random.normal(propDB[spids[i]]['COST'], propDB[spids[i]]['COSTVAR'])
+                        
+                        #normal distribution
+                        #propvec['COST'][i] = np.random.normal(propDB[spids[i]]['COST'], np.sqrt(propDB[spids[i]]['COSTVAR']))
+                        
                         #print(spids[i], propvec['COST'][i])
+
+                        #uniform distribution
+                        #propvec['COST'][i] = np.random.uniform(low = (min(0,propDB[spids[i]]['COST']-3*np.sqrt(propDB[spids[i]]['COSTVAR']))),\
+                        #high =(propDB[spids[i]]['COST']+3*np.sqrt(propDB[spids[i]]['COSTVAR'])))
+                        
+                        #lognormal
+                        mu = propDB[spids[i]]['COST']
+                        v= propDB[spids[i]]['COSTVAR']
+                        sigma = np.sqrt(v)
+                        propvec['COST'][i] = np.random.lognormal(mu, sigma)
+
+                        '''
+                        #truncated normal distribution
+                        mu = propDB[spids[i]]['COST']
+                        v= propDB[spids[i]]['COSTVAR']
+                        myclip_b = mu+3*np.sqrt(v)
+                        lower, upper = 0, myclip_b
+                        sigma = np.sqrt(v)
+                        X = stats.truncnorm( (lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma)
+                        #N = stats.norm(loc=mu, scale=sigma)
+                        propvec['COST'][i] = X.rvs(1)
+                        '''
+
+
+
+
                     else:
                         propvec['COST'][i] = propDB[spids[i]]['COST']
 
@@ -148,7 +179,31 @@ def make_property_vector_all_sample_cost_UP_single(propDB, change_name):
                         print("changing component number: ", i, change_name)
                         #propDB[spids[i]]['COSTVAR'] >0:
                         #print(spids[i])
-                        propvec['COST'][i] = np.random.normal(propDB[spids[i]]['COST'], propDB[spids[i]]['COSTVAR'])
+                        #NORMAL DISTRIBUTION
+                        #propvec['COST'][i] = np.random.normal(propDB[spids[i]]['COST'], np.sqrt(propDB[spids[i]]['COSTVAR'])) #normal distribution
+                        #print(propvec['COST'][i])
+                        
+                        #uniform distribution
+                        #propvec['COST'][i] = np.random.uniform(low = (min(0,propDB[spids[i]]['COST']-3*np.sqrt(propDB[spids[i]]['COSTVAR']))),\
+                        #high =(propDB[spids[i]]['COST']+3*np.sqrt(propDB[spids[i]]['COSTVAR'])))
+                        
+                        #lognormal
+                        mu = propDB[spids[i]]['COST']
+                        v= propDB[spids[i]]['COSTVAR']
+                        sigma = np.sqrt(v)
+                        propvec['COST'][i] = np.random.lognormal(mu, sigma)
+                        
+                        #truncated normal distribution
+                        #mu = propDB[spids[i]]['COST']
+                        #v= propDB[spids[i]]['COSTVAR']
+                        #myclip_b = mu+3*np.sqrt(v)
+                        #lower, upper = 0, myclip_b
+                        #sigma = np.sqrt(v)
+                        #X = stats.truncnorm( (lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma)
+                        #N = stats.norm(loc=mu, scale=sigma)
+                        #propvec['COST'][i] = X.rvs(1)
+                        
+
                         #print(spids[i], propvec['COST'][i])
                     else:
                         propvec['COST'][i] = propDB[spids[i]]['COST']
@@ -159,7 +214,7 @@ def make_property_vector_all_sample_cost_UP_single(propDB, change_name):
                     np.random.normal(propDB[spids[i]]['COST'], \
                         propDB[spids[i]]['COSTVAR'])
                     '''
-                    if (propvec['COST'][i] > 0.0):
+                    if (propvec['COST'][i] > 0.0): #truncated normal distribution instead
                         break
                     zz += 1
                     if( zz > 1000):
@@ -203,7 +258,7 @@ def make_property_vector(propDB):
         RONVEC[i] = (propDB[SPNM[i-1]]['RON'])
         SVEC[i] = (propDB[SPNM[i-1]]['S'])
         HoVVEC[i] = (propDB[SPNM[i-1]]['HoV'])
-        SLVEC[i] = (propDB[SPNM[i-1]]['SL'])
+        #SLVEC[i] = (propDB[SPNM[i-1]]['SL'])
         LFV150VEC[i] = (propDB[SPNM[i-1]]['LFV150'])
         PMIVEC[i] = (propDB[SPNM[i-1]]['PMI'])
         COSTVEC[i] = (propDB[SPNM[i-1]]['COST'])
@@ -458,11 +513,11 @@ def load_propDB(fname, propDB_initial=None, maxrows=18, maxcols=14):
                                 propDB[kk]['XTRA_NAMES'] = []
                                 propDB[kk]['XTRA_NAMES'].append(v)
     
-                        # print "adding key: ", k, ' value:', v
+                    
                     else:
                         print "key: ", k, "value: ", v
                         propDB[kk][k] = v
-
+                    #print("adding key: ", k, 'value: ', v)
             else:
                 print "key did not exist:", kk
                 propDB[kk] = {}

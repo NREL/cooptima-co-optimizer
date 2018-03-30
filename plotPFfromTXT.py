@@ -6,23 +6,27 @@ import pylab as P
 
 
 def load_data(KK,comp):
-	PFpoints=np.zeros([10000,2])
+	PFpoints=np.zeros([35586,2])
 	ii = 0
 
 	if comp==None:
-		filename = "pareto_cost_merit_all/sampling_pareto_data_all_K_"+str(KK) + ".txt"
+		filename = "merit_cost_pareto_data_all_K"+str(KK) + ".txt"
+		#filename = "pareto_cost_merit_all/sampling_pareto_data_all_K_"+str(KK) + ".txt"
 	else:
+		kk
 		filename = "pareto_cost_merit_K_" +str(KK) +"/sampling_pareto_data_"+comp+"_K_"+str(KK) + ".txt"
 
 	with open(filename, "r") as filestream:
 		for line in filestream:
 			L = line.strip().split(',')
-			PFpoints[ii,0] = float(L[0])
-			PFpoints[ii,1] = float(L[1])
+			#print L
+			PFpoints[ii,1] = float(L[0])
+			PFpoints[ii,0] = float(L[1])
 			ii = ii+1     
 	
-	merit = PFpoints[:,1]
-	cost = PFpoints[:,0]
+	merit = PFpoints[:,0]
+	cost = PFpoints[:,1]
+	#print(merit)
 	
 	#100 Pareto points per run are stored
 
@@ -151,6 +155,7 @@ def analysis5_plots(Kvals, mean_K_matrix_c, mean_K_matrix_m, median_K_matrix_c, 
 
 def analysis2(merit, merit_bracket, bpldata, KK, boxlabel, alldata):
 	max_merit = np.max(np.ravel(merit)) # maximum achievable merit
+	print(max_merit)
 	low_bound_merit = max_merit-merit_bracket*max_merit
 	#find all PF points with merit larger than low_bound_merit
 	best_percent_merit_ind = np.where(np.ravel(merit)>low_bound_merit)[0]	
@@ -189,15 +194,15 @@ def plotPFfromTXT():
 
 	clr = ['fuchsia', 'b', 'g', 'r', 'y', 'm', 'c', 'k', 'g', 'r', 'y', 'm']
 	mrk = ['.', 'o', 'x', '*', 'd', '>', 'o', 'o', 'x', 'x', 'x', 'x', 'x']
-	scenario1 = False
-	scenario2 = False
+	scenario1 = True
+	scenario2 = True
 	scenario3 = False
-	scenario4 = False
+	scenario4 = True#for mean/median: subdivide x-axis into samll intervals, then for each interval compute mean/median value and plot that 
 	scenario5 = True
 
 	
 	C_statistic = 3#the cost we are willing to pay plus minus C_eps%
-	C_eps = 0.1 #percent for wiggle room around C-statistic
+	C_eps = 0.25 #percent for wiggle room around C-statistic
 
 	merit_bracket = 0.02 #find all solutions within x% of max merit
 	for kk in range(len(comps)):
@@ -206,7 +211,7 @@ def plotPFfromTXT():
 		boxlabel=[]
 		boxlabel2 = []
 		max_comp_merit=[]
-		Kvals = [-2.0, -1.0, 1.0, 2.0, 3.0, 4.0]#[-2, -1, 1, 2]
+		Kvals = [-1.25]#[-2.0, -1.0, 1.0, 2.0, 3.0, 4.0]#[-2, -1, 1, 2]
 		max_merit_poss = np.zeros(len(Kvals))
 		cost_matrix = np.zeros([100,100])
 		merit_matrix = np.zeros([100,100])
@@ -247,9 +252,11 @@ def plotPFfromTXT():
 			if scenario3:
 					#SCENARIO 3: collect maximum possible merit for each K componentwise
 					max_merit_poss[jj] = np.max(np.ravel(merit))
+					print(max_merit_poss)
 
 			if scenario2:
 					#SCENARIO 2: find all pareto points for which merit is within merit_bracket percent of max merit
+					print(merit_bracket)
 					bpldata, boxlabel = analysis2(merit, merit_bracket, bpldata, KK, boxlabel, alldata)
 
 			if scenario1:

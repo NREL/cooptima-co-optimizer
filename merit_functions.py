@@ -18,6 +18,11 @@ simultaneously accelerate the introduction of affordable, scalable, and
 sustainable biofuels and high-efficiency, low-emission vehicle engines.
 
 """
+
+
+
+
+
 def mmf_single(RON=100.0, S=10.0, HoV=415.0, SL=46.0,
                LFV150=0.0, PMI=1.0, K=0.5):
     if PMI > 2.0:
@@ -74,7 +79,7 @@ def revised_mf(RON=91, S=8, HoV=414, SL=46, AFR=14.0, LFV150=0.0, PMI=1.6, K=-1.
     (K * (S-8.0)/1.6) +
     0.085 * ( HoV/(AFR+1.0) - 415.0/(14.0+1.0))/1.6 +
     ( HoV/(AFR+1.0) - 415.0/(14.0+1.0))/15.2 +
-    (SL - 46.0)/1.6 +
+    (SL - 46.0)/5.4 +
     0.008*(TC90_conv - TC90_mix) )
 
     if PMI > 1.6:

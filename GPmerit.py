@@ -43,11 +43,12 @@ def run_GP():
     output = dfAll.columns[1]
     dfOutputs = dfAll[output]
     dfInputs = dfAll[inputs]
-    
+
     X = dfInputs.values
+    #print(X.shape)
+    #print(np.amin(X, axis = 0), np.amax(X, axis = 0))
     y = dfOutputs.values
     scaler = preprocessing.StandardScaler().fit(X)
-
     return train_GP(X,y,scaler)
 
 def run_GP_fuels():
@@ -62,7 +63,7 @@ def run_GP_fuels():
 
     dfAll = dfAll.dropna()
     dfAll = dfAll[dfAll.Injection != 'UI']
-    inputs = dfAll.columns[[3,4,5,9,10,11]]
+    inputs = dfAll.columns[[3,4,5,9,10,11]] #CA50, IAT, KI, RON, S,HOV
     output = dfAll.columns[1]
     dfOutputs = dfAll[output]
     dfInputs = dfAll[inputs]
@@ -70,21 +71,26 @@ def run_GP_fuels():
     X = dfInputs.values
     y = dfOutputs.values
     scaler = preprocessing.StandardScaler().fit(X)
+    font ={'size':20}
     for fuel in dfAll.Fuel.unique():
         y_mean,y_std,y_true = predict_fuel(dfAll,inputs,output,fuel=fuel)
-        plt.figure()
+        #plt.figure()
+        fig, ax=plt.subplots()
         plt.plot(range(len(y_mean)),y_mean,'k')
         plt.fill_between(range(len(y_mean)), y_mean - y_std*2,
                          y_mean + y_std*2,
                          alpha=0.5, color='k')    
         plt.errorbar(range(len(y_mean)),y_true,yerr=40,fmt='o',c='b')
-        plt.legend(['GP prediction','GP +/- $2\sigma$','Actual experiments'])
+        plt.legend(['GP prediction','GP +/- $2\sigma$','Actual experiments'], loc = 'lower right')
 
         plt.title('Blind NMEP Prediction for '+ fuel)
         plt.xlabel('Experiment #')
         plt.ylabel('NMEP [kPa]')
-    plt.show()
-
+        plt.rc('font',**font)
+        plt.tight_layout()
+    #plt.show()
+        plt.savefig("gpstuff_"+fuel+".pdf")
+        plt.close("all")
 
 def train_GP(X,y,scaler):
     """Returns a trained Gaussian Process given training data and scaler."""
@@ -126,3 +132,14 @@ def predict_fuel(dfAll,inputs,output,fuel='E40-TRF71'):
     y_mean, y_std = predict_GP(GP,scaler,Xpred)
 
     return y_mean, y_std, dfTest[output].values
+
+
+if __name__ == "__main__":
+    #A, B  = run_GP()
+    run_GP_fuels()
+    lll
+    print(predict_GP(A,B,np.array([[10, 40, 8., 100., 5., 400]])))
+
+
+    lower = np.array([  6.7,  35. ,   2. ,  99.2,   0. , 303. ])
+    upper = np.array([ 23.8,  90. ,  10.5, 105.6,  12.2, 595. ])
