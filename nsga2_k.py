@@ -307,7 +307,7 @@ def eval_MMF_gp_opt(individual, propvec, Kinp, GP, scal):
         x0 = (numpy.array([23.8, 90., 10.5])+numpy.array([6.7, 35., 2.]))/2.
         #numpy.asarray([6.7, 35., 2.]) + numpy.asarray(numpy.array([23.8, 90., 10.5])-numpy.array([6.7, 35., 2.])) * numpy.asarray(numpy.random.rand(1,3)) #random starting point
         res = minimize(f_gp, x0, bounds=bound_list,   args = (RON,S,HOV, GP,scal,))#???????_ex?approx_grad = True,
-        mean_out = f_gp(res.x, RON,S,HOV, GP,scal)
+        mean_out = -f_gp(res.x, RON,S,HOV, GP,scal)
         #print(x0,mean_out)
         
         #print(out1, out2, mean_out)
@@ -333,7 +333,7 @@ def f_gp(x,RON,S,HOV, GP,scal):
     #print(gp_in)
     pred_mean, pred_std = predict_GP(GP, scal, gp_in)
 
-    return pred_mean[0]
+    return -pred_mean[0]
 
 def eval_mo2(individual, propvec, Kinp):#, ref_in, sen_in):
 
@@ -379,7 +379,8 @@ def eval_mo2(individual, propvec, Kinp):#, ref_in, sen_in):
                 mu = cooptimizer_input.sen_mean[kk]
                 var = cooptimizer_input.sen_var[kk]
                 sigma = numpy.sqrt(var)
-                #sen[kk] = numpy.random.normal(cooptimizer_input.sen_mean[kk],cooptimizer_input.sen_var[kk])
+
+                sen[kk] = numpy.random.normal(cooptimizer_input.sen_mean[kk],cooptimizer_input.sen_var[kk])
 
                 #normal distribution
                 #sen[kk] = numpy.random.normal(mu,sigma)
@@ -390,7 +391,7 @@ def eval_mo2(individual, propvec, Kinp):#, ref_in, sen_in):
                 #sen[kk] = numpy.random.uniform(low = (min(0,mu-3*sigma)),high =(mu+3*sigma))
                 
                 #lognormal
-                sen[kk] = numpy.random.lognormal(mu, sigma)
+                #sen[kk] = numpy.random.lognormal(mu, sigma)
                         
                 #truncated normal distribution
                 #lower, upper = 0, mu+3*sigma
@@ -403,10 +404,10 @@ def eval_mo2(individual, propvec, Kinp):#, ref_in, sen_in):
             else:
                 mu = cooptimizer_input.ref_mean[kk]
                 var = cooptimizer_input.ref_var[kk]
-                print(mu,var)
+                #print(mu,var)
                 sigma = numpy.sqrt(var)
 
-                #ref[kk] = numpy.random.normal(cooptimizer_input.ref_mean[kk],cooptimizer_input.ref_var[kk])
+                ref[kk] = numpy.random.normal(cooptimizer_input.ref_mean[kk],cooptimizer_input.ref_var[kk])
 
                 #normal distribution
                 #ref[kk] = numpy.random.normal(mu,sigma)
@@ -417,8 +418,8 @@ def eval_mo2(individual, propvec, Kinp):#, ref_in, sen_in):
                 #ref[kk] = numpy.random.uniform(low = (min(0,mu-3*sigma)),high =(mu+3*sigma))
                 
                 #lognormal
-                ref[kk] = numpy.random.lognormal(mu, sigma)
-                print(ref[kk], sen[kk])
+                #ref[kk] = numpy.random.lognormal(mu, sigma)
+                #print(ref[kk], sen[kk])
                         
                 #truncated normal distribution
                 #lower, upper = 0, mu+3*sigma
@@ -431,6 +432,7 @@ def eval_mo2(individual, propvec, Kinp):#, ref_in, sen_in):
         if ref['PMI'] < 0.0:
             p=p+1
             continue 
+
         if ref['S'] < 0.0:
             p=p+1
             continue  
@@ -565,7 +567,7 @@ def nsga2_pareto_K(KK, propvec,  pDB, sen=None, ref=None,seed=None):
     #toolbox.register("evaluate", eval_MMF_gp, propvec=propvec, Kinp=KK, GP = GP, scal = scal)#, propvec=propvec, Kinp=KK)
     #toolbox.register("evaluate", eval_gp, GP = GP, scal = scal)#, propvec=propvec, Kinp=KK)
     #toolbox.register("evaluate", eval_mo, propvec=propvec, Kinp=KK)#, ref_in = ref, sen_in = sen )
-    toolbox.register("evaluate", eval_mo2, propvec=propvec, Kinp=KK)#, ref_in = ref, sen_in = sen )
+    #toolbox.register("evaluate", eval_mo2, propvec=propvec, Kinp=KK)#, ref_in = ref, sen_in = sen )
     #toolbox.register("evaluate", eval_mean_var, propDB=pDB, Kinp=KK)
 
     toolbox.register("mate", tools.cxSimulatedBinaryBounded,

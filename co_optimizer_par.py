@@ -38,8 +38,9 @@ from nsga2_k import nsga2_pareto_K as run_optmize_nsga2
 import numpy as np
 import cooptimizer_input
 from matplotlib.backends.backend_pdf import PdfPages
-
-
+from maximize_merit import maximize_merit
+from surrogate_optimization import surrogate_optimization
+from surrogateMO_optimization import surrogateMO_optimization
 #parallel stuff
 from multiprocessing import Pool
 import random
@@ -50,14 +51,14 @@ mrk = ['o', 'x', 's', '^', '<', '*', 'o', 'o', 'x', 'x', 'x', 'x', 'x']
 #-----------------------------------
 def wrapper_func((n,varID,propDB, KK)):
     np.random.seed(n)
-    ncomp, spc_names, propvec = make_property_vector_all_sample_cost_UP_single(propDB, change_name)
+    ncomp, spc_names, propvec = make_property_vector_all_sample_cost_UP_single(propDB, change_name) #only randomly sample cost for one (change_name) fuel component
     #print(propvec['COST'], ncomp)
     
     Pfront = run_optmize_nsga2(KK, propvec, propDB) #Pfront = [-merit, cost, obj3]
     return Pfront, propvec, spc_names
 
 
-def wrapper_func_all((n,propDB, KK)):
+def wrapper_func_all((n,propDB, KK)): #randomly samples cost for all fuel components
     np.random.seed(n)
     ncomp, spc_names, propvec = make_property_vector_all_sample_cost(propDB)
     Pfront = run_optmize_nsga2(KK, propvec, propDB) #Pfront = [-merit, cost, obj3]
@@ -89,6 +90,7 @@ def write_composition(f, c, hdr_in=None, prefix=None):
 
 if __name__ == '__main__':
     t0=time.time()
+    np.random.seed(0)
     print ("=================================================================")
     print ("Welcome to the Co-optimizer")
     print ("=================================================================")
@@ -498,32 +500,39 @@ if __name__ == '__main__':
             sys.exit(-2)
 
         if cooptimizer_input.use_deap_NSGAII:
-            print("Not yet implemented using NSGAII")
-            sys.exit(-1)
-
-        M = []
-        for KK, col, mk in zip(cooptimizer_input.KVEC, clr[0:n+1], mrk[0:n+1]):
-            compfile.write("K = {}-------------------------\n".format(KK))
-            if cooptimizer_input.use_pyomo:
-                comp, isok = run_optimize_pyomo_K(KK, propDB)
-                if (isok):
-                    write_composition(compfile, comp)
-                    compfile.write("\n")
-                    m = comp_to_mmf(comp, propDB, KK)
-                    M.append(m)
-            elif cooptimizer_input.use_deap_NSGAII:
-                C, M = run_optmize_nsga2(KK, propvec)
-            else:
-                print("No valid optimization algorithm specified")
-                sys.exit(-1)
-        print ("{}".format(cooptimizer_input.KVEC))
-        print ("{}".format(M))
-        plt.scatter(cooptimizer_input.KVEC, M)
-        plt.xlabel('K')
-        plt.ylabel('Merit')
-        plt.savefig(cooptimizer_input.k_sweep_plotfilename, form='pdf')
-        output_files.append(cooptimizer_input.k_sweep_plotfilename)
-        output_files.append(cooptimizer_input.k_sweep_datafilename)
+            M, F = [],[]
+            
+            for KK, col, mk in zip(cooptimizer_input.KVEC, clr[0:n+1], mrk[0:n+1]):
+                compfile.write("K = {}-------------------------\n".format(KK))
+                if cooptimizer_input.use_pyomo:
+                    comp, isok = run_optimize_pyomo_K(KK, propDB)
+                    if (isok):
+                        write_composition(compfile, comp)
+                        compfile.write("\n")
+                        m = comp_to_mmf(comp, propDB, KK)
+                        M.append(m)
+                elif cooptimizer_input.use_deap_NSGAII:
+                    #merit = maximize_merit(KK, propvec, propDB)
+                    #M.append(merit)
+                    
+                    data = surrogate_optimization(KK, propvec,  propDB)
+                    F.append(-data.Fbest)
+                    
+                    #data = surrogateMO_optimization(KK, propvec,  propDB)
+                    #F.append(-data.Fbest)
+                else:
+                    print("No valid optimization algorithm specified")
+                    sys.exit(-1)
+            print ("{}".format(cooptimizer_input.KVEC))
+            print ("{}".format(M))
+            #plt.scatter(cooptimizer_input.KVEC, M, marker = 'o', c= 'r',s=40,label='python optimizer')
+            plt.scatter(cooptimizer_input.KVEC, F, marker = '^', c = 'b',s=40,label='surrogate optimizer')
+            plt.xlabel('K')
+            plt.ylabel('Merit')
+            plt.legend(loc=0, fontsize=10)
+            plt.savefig(cooptimizer_input.k_sweep_plotfilename, form='pdf')
+            output_files.append(cooptimizer_input.k_sweep_plotfilename)
+            output_files.append(cooptimizer_input.k_sweep_datafilename)
 
     if cooptimizer_input.task_list['K_sampling']:
         plt.close()

@@ -20,7 +20,7 @@ sustainable biofuels and high-efficiency, low-emission vehicle engines.
 """
 
 
-task_list = {}
+task_list = {} #the optimizations to be done -- several options should be possible iteratively or in parallel
 displacement_setup = {}
 property_min = {}
 property_max = {}
@@ -49,24 +49,24 @@ task_list['cost_vs_merit_Pareto_UP'] = False
 #      based on uncertainty in cost properties. Do by sampling. Then we can put in bin+-delta.
 
 # Run a tradeoff analysis between engine design and obtainable merit function
-task_list['K_vs_merit_sweep'] = False
+task_list['K_vs_merit_sweep'] = True
 
 # Do sampling for various uncertain parameters
 task_list['K_sampling'] = False
 k_sampling_datafilename = 'k_sampling.txt'
 k_sampling_plotfilename = 'k_sampling.pdf'
-nsamples = 100#30 #number of random numbers used for each cost (basically nsamples runs of the optimizer with different random numbers)
+nsamples = 5#30 #number of random numbers used for each cost (basically nsamples runs of the optimizer with different random numbers)
 kmean = 0.5
 kvar = 1.0
 
 # Do uncertainity propagation for uncertainty in merit function
-task_list['UPMO'] = True
+task_list['UPMO'] = False
 task_list['UP'] = False
 UP_datafilename = 'UP.txt'
 UP_plotfilename = 'UP.pdf'
 
 
-if task_list['cost_vs_merit_Pareto'] or task_list['mean_vs_var_Pareto'] or task_list['UPMO']:
+if task_list['cost_vs_merit_Pareto'] or task_list['mean_vs_var_Pareto'] or task_list['UPMO'] or task_list['K_vs_merit_sweep']:
 	parallel_nsgaruns =False	
 else:
 	parallel_nsgaruns =True
@@ -100,7 +100,7 @@ ref_mean['SL'] = 46.0
 ref_mean['PMI'] = 1.6 #old:2.0
 
 ref_var = {}
-tul = .1
+tul = 1
 ref_var['RON'] = 8.0*tul
 ref_var['S'] = 8.*tul #10.0*tul
 ref_var['HoV'] = 20.0*tul
@@ -162,9 +162,9 @@ k_sweep_plotfilename = "ksweep.pdf"
 # -----------------------------------------------------------------------------
 # Running multiple "K" values in merit function
 #KVEC = [-2.0, -1.5, -1.0,-0.5, 0.5,  1.0, 1.5,2.0,2.5,3.0,3.5,4.0] #-vector
-#KVEC = [-2.0, 0.5,  1.0]  # -vector
+KVEC = [-1.25]  # -vector
 #KVEC = [-2.0, -1.25, -0.5]  # -vector
-KVEC = [-1.25]#, 3, 4]#[-2., -1., 1., 2., 3., 4.]  # -vector
+#KVEC = [-1.25]#, 3, 4]#[-2., -1., 1., 2., 3., 4.]  # -vector
 #KVEC = [-2, -1, 1, 2, 3, 4]#
 
 # -----------------------------------------------------------------------------
