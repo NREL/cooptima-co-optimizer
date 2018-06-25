@@ -1,113 +1,142 @@
 Optimization
 ============
 
-Finding blends that maximize merit function
--------------------------------------------
+The co-optimizer comes with a variety of optimization options that are aimed at solving single and multi-objective optimization problems. There are pre-defined options the user can choose from (see below) and there is the possibility to query self-defined objective functions. In the following, we describe step-by-step how and what files to change in order to run the given options. At the end, we outline how the user can define their own objective functions.  A user interface for this capability is a work in progress; the following notes provide an overview of the available capabilities and how to access them. Configuration currently requires the user to make option selections and changes in two files, namely in cooptimizer_input.py and nsga2_k.py. 
 
-* Unconstrained optimization
-* Single components into blendstock
+
+Single-objective Optimization
+-----------------------------
+
+This returns one solution that maximizes the MMF for different values of K. To use it, in cooptimizer_input.py set:
+::
+
+	task_list['K_vs_merit_sweep'] = True
+
+and also Select a range of K values in cooptimizer_input.py l. 165 (does as many single objective optimizations as there are K values) 
+
+Two optimization options are available:	
+
+* The first solves the problem directly and is well suited for a cheap-to-compute objective function. This option is selected in co_optimizer_par.py by setting:
+	:: 
+
+		l. 515: merit = maximize_merit(KK, propvec, propDB)
+		l. 516: M.append(merit); and l. 527 for plot: plt.scatter(cooptimizer_input.KVEC, M, marker = 'o', c= 'r',s=40,label='python optimizer')
+
+* The second constructs a surrogate function to aid the optimization and is well suited for an expensive-to-compute objective function. To use this option, set in co_optimizer_par.py
+	::
+
+		 l. 518: data = surrogate_optimization(KK, propvec,  propDB)
+		 l. 519: F.append(-data.Fbest); 
+		 l. 528: plt.scatter(cooptimizer_input.KVEC, F, marker = '^', c = 'b', s=40, label='surrogate optimizer')
+
 
 Multi-objective Optimization
 ----------------------------
 
-A user interface for this capability is a work in progress; the following notes provide an overview of the available capabilities and how to access them. Selection of the correct form of the objective function for the otpimizer is currently done by uncommenting the correct definition from lines 566--571 in nsga2_k.py. 
+Multi-objective optimization results in (a family) of Pareto fronts rather than a particular vale. Selection of the correct form of the objective function for the otpimizer is currently done by uncommenting the correct definition from lines 566--571 in nsga2_k.py.  
+
+Deterministic optimization: return one Pareto front
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For these analysis, in cooptimizer_input.py set:
+::
+
+	l.39: task_list['cost_vs_merit_Pareto'] = True
+
+Several combinations of objective functions are possible:
+
+A. Maximize the Miles merit function MMF, minimize the associated costs
+	In nsga2_k.py, set:
+	:: 
+	  	
+		l. 569: toolbox.register("evaluate", eval_mo, propvec=propvec, Kinp=KK)
+		l. 543: NDIM = len(propvec['COST'])
+		l. 547: creator.create("FitnessMin", base.Fitness, weights=(1.0, -1.0))
+
+	l. 578 & 579 – must be active
+
+B. Maximize the Miles merit function, maximize the net mean effective pressure (NMEP)
+	In nsga2_k.py set:
+	::
+
+		l. 567: toolbox.register("evaluate", eval_MMF_gp, propvec=propvec, Kinp=KK, GP = GP, scal = scal)
+		l. 543: NDIM = len(propvec['COST'])+3
+		l. 547: creator.create("FitnessMin", base.Fitness, weights=(1.0, 1.0))
+		l. 538: use GP, scal  = run_GP()
+
+	l. 578 & 579 – must be active
+
+C.	Maximize the Miles merit function and also maximize NMEP by solving an optimization subproblem on the NMEP-related variables
+	In nsga2_k.py set:
+	::
+
+		l. 566: toolbox.register("evaluate", eval_MMF_gp_opt, 	vec=propvec, Kinp=KK, GP = GP, scal = scal)
+		l. 543: NDIM = len(propvec['COST'])
+		l. 547: creator.create("FitnessMin", base.Fitness, weights=(1.0, 1.0))
+		l. 538: scal = run_GP()
+
+	l. 578 & 579 – must be active
+
+D.	Maximize the expected NMEP, minimize the variance of NMEP
+	In nsga2_k.py use:
+	:: 
+
+		l. 568: toolbox.register("evaluate", eval_gp, GP = GP, scal = scal)
+		l. 543: NDIM= 6
+		l. 547: creator.create("FitnessMin", base.Fitness, weights=(1.0, -1.0))
+		l. 538: use GP, scal  = run_GP()
+
+	outcomment l. 578 & 579
+
+Optimization under uncertainty in MMF coefficients: return one Pareto front
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This analysis is to maximize the mean of MMF and minimize the MMF variance (assuming uncertainty in coefficients of the MMF, as defined in lines 75-108 in cooptimizer_input.py). 
+
+In cooptimizer_input.py l.41 set:
+::
+
+	task_list['mean_vs_var_Pareto'] = True
+
+In nsga2_k.py set:
+
+::
+
+	l. 570: toolbox.register("evaluate", eval_mo2, propvec=propvec, Kinp=KK)
+	l. 543: NDIM= = len(propvec['COST'])
+	l. 547: creator.create("FitnessMin", base.Fitness, weights=(1.0, -1.0))
+	l. 578 & 579 – must be active
+	l. 338 and following: choose distribution from which to sample coefficients
+
+Optimization under uncertainty in one cost coefficient: returns several Pareto fronts
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Maximizes the MMF, and minimizes the cost, where the cost is a random variable for a single fuel component (all other fuel components are kept with deterministic costs). We draw nsamples (see cooptimizer_input.py l. 58) values for the i-th cost component and thus do nsamples optimizations, yielding nsamples Pareto fronts
+
+In cooptimizer_input.py set:
+::
+	task_list['cost_vs_merit_Pareto_UP_single'] = True
+
+In nsga2_k.py:
+::
+	l. 569: toolbox.register("evaluate", eval_mo, propvec=propvec, Kinp=KK)
+	l. 543: NDIM= = len(propvec['COST'])
+	l. 547: creator.create("FitnessMin", base.Fitness, weights=(1.0, -1.0))
+
+l. 578 & 579 – must be active
 
 
-A-1
-~~~
-option 'cost_vs_merit_Pareto'
-in nsga2_k: objective function is eval_mo
-outfiles: cost_vs_merit_plotfilename (if 2 objectives only); txt file with Pareto front points: sampling_pareto_merit_cost_K_str(KK).txt
-parto front [Merit, Cost]
-adjust before running: 
-in eval_mo: add objective functions (computation and as additional output arguments)
-in nsga2_pareto_K: creator.create("FitnessMin", base.Fitness, weights=(1.0, -1.0)) -- add -1 or 1 for additional objectives
-parallel_nsgaruns =False (nothing else is parallelized)
+Optimization under uncertainty in all cost coefficients: 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This returns  several Pareto fronts that maximizes the MMF and minimizes the cost, where all component costs are randomly drawn from a distribution. We draw nsamples (see cooptimizer_input.py l. 58) values for each cost component and thus do nsamples optimizations, yielding nsamples Pareto fronts
 
-A-2
-~~~~
-option 'cost_vs_merit_Pareto' - also does maximization of Miles function and Maximization of NMEP
-in nsga2_k: objective function is eval_mmf_gp
-outfiles: cost_vs_merit_plotfilename (if 2 objectives only); txt file with Pareto front points: sampling_pareto_merit_cost_K_str(KK).txt
-parto front [Merit, Cost]
-adjust before running: 
-in eval_mmf_gp: scaling of engine-related parameters that do not show up in the Miles function: currently uses smallest and largest observed values based on which the GP is computed
-in nsga2_pareto_K: creator.create("FitnessMin", base.Fitness, weights=(1.0, 1.0)) -- add -1 or 1 for additional objectives
-parallel_nsgaruns =False (nothing else is parallelized)
-must adjust in main nsga2_k the number of parameters 22+6
+In cooptimizer_input.py set:
+::
+	task_list['cost_vs_merit_Pareto_UP'] = True
 
-A-3
-~~~~
-option 'cost_vs_merit_Pareto' - also does maximization of Miles function and Maximization of optimized NMEP
-in nsga2_k: objective function is eval_MMF_gp_opt
-consider only the fuel properties that were measured in experiments for fitting the GP -- fuel compositions that lead to llfuel properties outside of the learning range get bad fitness values and thus they wont be used to create the next generation.
-With set fuel properties (in the learning range of the GP), we optimize the engine parameters over the range over which the GP was trained.
-outfiles: cost_vs_merit_plotfilename (if 2 objectives only); txt file with Pareto front points: sampling_pareto_merit_cost_K_str(KK).txt
-parto front [Merit, Cost]
-adjust before running: 
-in eval_MMF_gp_opt: scaling of engine-related parameters that do not show up in the Miles function: currently uses smallest and largest observed values based on which the GP is computed; fuel property ranges that are outside the GP learning range must be adjusted if new data comes in
-in nsga2_pareto_K: creator.create("FitnessMin", base.Fitness, weights=(1.0, 1.0)) -- add -1 or 1 for additional objectives
-parallel_nsgaruns =False (nothing else is parallelized)
+In nsga2_k.py:
+::
+	l. 569, toolbox.register("evaluate", eval_mo, propvec=propvec, K	=KK)
+	l. 543: NDIM= = len(propvec['COST'])
+	l. 547: creator.create("FitnessMin", base.Fitness, weights=(1.0, -1.0))
 
-A-4
-~~~~
-option 'cost_vs_merit_Pareto' - also does maximization of NMEP and minimization of the variance
-in nsga2_k: objective function is eval_gp
-outfiles: cost_vs_merit_plotfilename (if 2 objectives only); txt file with Pareto front points: sampling_pareto_merit_cost_K_str(KK).txt
-parto front [Merit, Cost]
-adjust before running: 
-in eval_gp: scaling of fuel property and engine-related parameters: currently uses smallest and largest observed values based on which the GP is computed
-in nsga2_pareto_K: creator.create("FitnessMin", base.Fitness, weights=(1.0, -1.0)) -- add -1 or 1 for additional objectives
-parallel_nsgaruns =False (nothing else is parallelized)
-must adjust in main nsga2_k the number of parameters
+l. 578 & 579 – must be active
 
-B
-~~~
-option 'mean_vs_var_Pareto'
-in nsga2_k: objective function is eval_mo2
-outfiles: mean_vs_var_merit_plotfilename (if 2 objectives only); txt file with Pareto front points: sampling_pareto_mean_var_K_str(KK).txt
-in eval_mo: add objective functions (computation and as additional output arguments)
-in nsga2_pareto_K: creator.create("FitnessMin", base.Fitness, weights=(1.0, -1.0)) -- add -1 or 1 for additional objectives
-parallel_nsgaruns =False (nothing else is parallelized)
-
-A) and B) can be modularized into one (only differ wrt file names and the objectives that are being optimized
-
-
-
-
-
-
-general settings:
-in nsga2_k: NGEN (number of generations); MU (number of individuals)
-parto front [Merit mean, Merit variance]
-nsamples for uncertainty propagation
-
-
-
-Uncertainty
------------
-
-C
-~~
-option 'cost_vs_merit_Pareto_UP_single'
-here we do several NSGA2 runs in parallel and therefore parallel_nsgaruns =True (cannot do nested paralellism with multiprocessing)
-wrapper function (wrapper_func) draws random samples for one cost component at a time
-n nsga2_k: objective function is eval_mo
-decorators!!
-
-D
-~~
-option 'cost_vs_merit_Pareto_UP'
-here we do several NSGA2 runs in parallel and therefore parallel_nsgaruns =True (cannot do nested paralellism with multiprocessing)
-n nsga2_k: objective function is eval_mo
-wrapper function (wrapper_func_all) draws random samples for all cost components
-
-E
-~~
-option 'UPMO'
-uncertainty in fuel properties
-parallelization happens within NSGA2, for a given individual, we do nsamples function evaluations to obtain expected merit and variance
-in nsga2: objective function is eval_mo2
-outfiles: cooptimizer_input.mean_vs_var_merit_plotfilename, sampling_pareto_data_mean_var_K_+str(KK).txt
-pareto front default [max mean, min var] + possibly cost
-adjust before running: select eval_mo2, number of objectives

@@ -14,6 +14,8 @@ Contents:
    Introduction.rst
    Basics.rst
    Optimization.rst
+   Advanced.rst
+   Models.rst
 
 
 
