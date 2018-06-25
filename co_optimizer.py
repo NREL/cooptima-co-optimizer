@@ -80,7 +80,7 @@ if __name__ == '__main__':
 
     output_files = []
 
-    for t, v in cooptimizer_input.task_list.iteritems():
+    for t, v in cooptimizer_input.task_list.items():
         if v:
             ans = 'Yes'
         else:
@@ -113,15 +113,17 @@ if __name__ == '__main__':
                         write_composition(compfile, comp)
                 compfile.write("\n")
             elif cooptimizer_input.use_deap_NSGAII:
-                C, M = run_optmize_nsga2(KK, propvec)
+                Front = run_optmize_nsga2(KK, propvec, propDB)
+                C = Front[:, 1]
+                M = Front[:, 0]
             else:
                 print("No valid optimization algorithm specified")
                 sys.exit(-1)
             plt.scatter(C, M, label="K={}".format(KK), marker=mk, color=col)
             plt.xlabel('Cost')
             plt.ylabel('Merit')
-        plt.legend(loc=8, ncol=3, fontsize=10)
-        plt.title("Co-Optimizer GA Pareto Front")
+        plt.legend(loc=8, ncol=3, fontsize=18)
+        plt.title("Co-Optimizer GA Pareto Front",fontsize=24)
         plt.savefig(cooptimizer_input.cost_vs_merit_plotfilename, form='pdf')
         output_files.append(cooptimizer_input.cost_vs_merit_plotfilename)
         output_files.append(cooptimizer_input.cost_vs_merit_datafilename)

@@ -60,7 +60,7 @@ def bob_constraint(individual, propvec):
     return sum(individual*propvec['BOB'])
 
 
-def n_samp_wrap((n,individual,propDB,Kinp)):
+def n_samp_wrap(n,individual,propDB,Kinp):
     numpy.random.seed(n)
     
     ncomp, spc_names, propvec = make_property_vector_all_sample_cost(propDB)
@@ -510,7 +510,7 @@ def scale_2():
             for child in offspring:
                 sumChild = sum(child[0:22])
 
-                for i in xrange(22):#len(child)):
+                for i in range(22):#len(child)):
                     child[i] = child[i]/sumChild
 
             return offspring
@@ -566,7 +566,7 @@ def nsga2_pareto_K(KK, propvec,  pDB, sen=None, ref=None,seed=None):
     #toolbox.register("evaluate",eval_MMF_gp_opt, propvec=propvec, Kinp=KK, GP = GP, scal = scal)
     #toolbox.register("evaluate", eval_MMF_gp, propvec=propvec, Kinp=KK, GP = GP, scal = scal)#, propvec=propvec, Kinp=KK)
     #toolbox.register("evaluate", eval_gp, GP = GP, scal = scal)#, propvec=propvec, Kinp=KK)
-    #toolbox.register("evaluate", eval_mo, propvec=propvec, Kinp=KK)#, ref_in = ref, sen_in = sen )
+    toolbox.register("evaluate", eval_mo, propvec=propvec, Kinp=KK)#, ref_in = ref, sen_in = sen )
     #toolbox.register("evaluate", eval_mo2, propvec=propvec, Kinp=KK)#, ref_in = ref, sen_in = sen )
     #toolbox.register("evaluate", eval_mean_var, propDB=pDB, Kinp=KK)
 

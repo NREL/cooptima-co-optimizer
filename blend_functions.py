@@ -296,10 +296,10 @@ def get_bRON_fcns(fp):
             bMON_y.append( (r1 - (1.0-x1)*r0)/x1)
             bMON_x.append( (x1) )
 
-            print " computing bMON for :", ib, fname    
-            print "    base MON : ", r0
-            print "    vol_frac : ", x1
-            print "    blend MON : ", r1
+            print (" computing bMON for :{}, {}".format(ib, fname))
+            print ("    base MON : {}".format(r0))
+            print ("    vol_frac : {}".format(x1))
+            print ("    blend MON : {}".format(r1))
             # Maybe put in pure component RON at x=1.0?
             
             ib += 1

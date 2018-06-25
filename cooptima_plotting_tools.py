@@ -149,7 +149,7 @@ def plot_prop_parallel(proplist):
     dims = len(proplist[0])
     x = range(dims)
 
-    print proplist[0]
+    print("{}".format(proplist[0]))
 
     fig, axs = plt.subplots(1, dims-1, sharey=False)
     style = ['r-']*len(proplist)
@@ -180,11 +180,10 @@ def plot_prop_parallel(proplist):
     for prop in proplist:
         nd_props = []
         for p in prop_order:
-            print "normalizing: ", prop[p], " by min / range: ",\
-                  min_per_prop[p], range_per_prop[p]
+            print ("normalizing: {} by min/range: {}, {}".format(prop[p], min_per_prop[p], range_per_prop[p]))
             if np.abs(range_per_prop[p]) > 0.0:
                 normval = ((prop[p] - min_per_prop[p])/range_per_prop[p])
-                print "norm val = ", normval
+                print ("norm val = {}".format(normval))
                 nd_props.append(normval)
             else:
                 nd_props.append(0.5)

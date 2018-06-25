@@ -43,7 +43,7 @@ def make_property_vector_all(propDB):
 
     ncomp = len(spids)
 
-    props = propDB[propDB.keys()[0]].keys()
+    props = list(propDB[list(propDB.keys())[0]].keys())
 
     propvec = {}
     for prop in props:
@@ -498,12 +498,12 @@ def load_propDB(fname, propDB_initial=None, maxrows=18, maxcols=14):
         if propDB_initial is None:
                 propDB[kk] = (copy.deepcopy(newcomponent))
         else:
-            print "Updating record with key = ", kk
+            print ("Updating record with key = {}".format(kk))
             if kk in propDB.keys():
-                print "key already exists:", kk
-                print "   Old name:", propDB[kk]['NAME']
-                print "   New name:", newcomponent['NAME']
-                for k, v in newcomponent.iteritems():
+                print ("key already exists:{}".format(kk))
+                print ("   Old name:{}".format(propDB[kk]['NAME']))
+                print ("   New name:{}".format(newcomponent['NAME']))
+                for k, v in newcomponent.items():
                     # print "Old record", propDB[newcomponent['CAS']]
                     if k is 'NAME':
                         if propDB[kk][k] is not v:
@@ -513,13 +513,9 @@ def load_propDB(fname, propDB_initial=None, maxrows=18, maxcols=14):
                                 propDB[kk]['XTRA_NAMES'] = []
                                 propDB[kk]['XTRA_NAMES'].append(v)
     
-                    
                     else:
-                        print "key: ", k, "value: ", v
                         propDB[kk][k] = v
-                    #print("adding key: ", k, 'value: ', v)
             else:
-                print "key did not exist:", kk
                 propDB[kk] = {}
                 for k, v in newcomponent.iteritems():
                     propDB[kk][k] = v

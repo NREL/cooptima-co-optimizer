@@ -36,7 +36,7 @@ component_max = {}
 # What the co-optimizer should do
 
 # Run a tradeoff analysis between cost and obtainable merit function
-task_list['cost_vs_merit_Pareto'] = False
+task_list['cost_vs_merit_Pareto'] = True
 
 task_list['mean_vs_var_Pareto'] = False
 
@@ -49,7 +49,7 @@ task_list['cost_vs_merit_Pareto_UP'] = False
 #      based on uncertainty in cost properties. Do by sampling. Then we can put in bin+-delta.
 
 # Run a tradeoff analysis between engine design and obtainable merit function
-task_list['K_vs_merit_sweep'] = True
+task_list['K_vs_merit_sweep'] = False
 
 # Do sampling for various uncertain parameters
 task_list['K_sampling'] = False

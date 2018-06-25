@@ -107,30 +107,30 @@ def run_optimize_vs_C(cstar, KK, propDB, initial_X=None):
         if (result.solver.status == SolverStatus.ok):
             isok = True
         else:
-            print "... Something wrong, maybe try restaring "\
+            print ("... Something wrong, maybe try restaring "\
                   " trying to find a new starting place from a"\
-                  " perturbed problem"
+                  " perturbed problem")
             newcomp, perturbok = run_optimize_vs_C(cstar*1.1, KK,
                                     propDB, initial_X=None)
             if (perturbok):
-                print "... Perturbed solution succeeded, "\
-                      "setting up to restart from it"
+                print ("... Perturbed solution succeeded, "\
+                      "setting up to restart from it")
                 for i in range(1, ncomp+1):
                     model.X[i].value = newcomp[spc_names[i-1]]
 
                 perturbokresult = opt.solve(model,
                                             options={'max_iter': 10000})
                 if (perturbokresult.solver.status == SolverStatus.ok):
-                    print "... Found solution to original problem"\
-                           " from perturbed solution, success"
+                    print ("... Found solution to original problem"
+                           " from perturbed solution, success")
                     isok = True
                 else:
-                    print "... Failed to find solution to original"\
-                          " problem from perturbed solution"
+                    print ("... Failed to find solution to original"\
+                          " problem from perturbed solution")
                     isok = False
 
             else:
-                print "... Perturbed solution failed"
+                print ("... Perturbed solution failed")
                 isok = False
         # print result
         # print("\nDisplaying Soluiton\n" + '-'*60)
@@ -218,29 +218,29 @@ def run_optimize_vs_K(KK, propDB, initial_X=None,ref=None,sen=None):
         if (result.solver.status == SolverStatus.ok):
             isok = True
         else:
-            print "... Something wrong, maybe try restaring "\
+            print( "... Something wrong, maybe try restaring "\
                   " trying to find a new starting place from a"\
-                  " perturbed problem"
+                  " perturbed problem")
             newcomp, perturbok = run_optimize_vs_K(KK*1.1, propDB,
                                                    initial_X=None)
             if (perturbok):
-                print "... Perturbed solution succeeded,"\
-                      " setting up to restart from it"
+                print ("... Perturbed solution succeeded,"\
+                      " setting up to restart from it")
                 for i in range(1, ncomp+1):
                     model.X[i].value = newcomp[spc_names[i-1]]
 
                 perturbokresult = opt.solve(model, options={'max_iter': 10000})
                 if (perturbokresult.solver.status == SolverStatus.ok):
-                    print "... Found solution to original problem \
-                    from perturbed solution, success"
+                    print ("... Found solution to original problem \
+                    from perturbed solution, success")
                     isok = True
                 else:
-                    print "... Failed to find solution to original"\
-                          " problem from perturbed solution"
+                    print ("... Failed to find solution to original"\
+                          " problem from perturbed solution")
                     isok = False
 
             else:
-                print "... Perturbed solution failed"
+                print ("... Perturbed solution failed")
                 isok = False
         # print result
         # print("\nDisplaying Soluiton\n" + '-'*60)
