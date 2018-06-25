@@ -524,8 +524,8 @@ def surrogateMO_optimization(KK, propvec,  pDB):
 	#optimization loop
 	while data.m < data.maxeval and localminflag == 0:
 		iterctr = iterctr + 1 # increment iteration counter
-		print '\n Iteration: %d \n' % iterctr
-		print '\n fEvals: %d \n' % data.m
+		print ('\n Iteration: {} \n'.format(iterctr))
+		print ('\n fEvals: {} \n'.format(data.m))
 		#print '\n Best value in this restart: %2.4f \n' %data.Fbest
 	
 		# number of new samples in an iteration

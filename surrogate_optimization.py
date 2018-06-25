@@ -272,9 +272,9 @@ def surrogate_optimization(KK, propvec,  pDB):
 	#optimization loop
 	while data.m < data.maxeval and localminflag == 0:
 		iterctr = iterctr + 1 # increment iteration counter
-		print '\n Iteration: %d \n' % iterctr
-		print '\n fEvals: %d \n' % data.m
-		print '\n Best value in this restart: %2.4f \n' %data.Fbest
+		print ('\n Iteration: {} \n'.format(iterctr))
+		print ('\n fEvals: {} \n'.format(data.m))
+		print ('\n Best value in this restart: {%2.4f} \n'.format(data.Fbest))
 	
 		# number of new samples in an iteration
 		NumberNewSamples = min(data.n_samp,data.maxeval - data.m)
@@ -357,16 +357,16 @@ def surrogate_optimization(KK, propvec,  pDB):
 		if failctr >= failtolerance:
 			if shrinkctr >= maxshrinkparam:
 				shrinkflag = 0
-				print 'Stopped reducing sigma because the maximum reduction has been reached.'
+				print ('Stopped reducing sigma because the maximum reduction has been reached.')
 			failctr = 0
 
 			if shrinkflag == 1:
 				shrinkctr = shrinkctr + 1
 				sigma_stdev = data.sigma_stdev / 2
-				print 'Reducing sigma by a half!'
+				print ('Reducing sigma by a half!')
 			else:
 				localminflag = 1
-				print 'Algorithm is probably in a local minimum! Restarting the algorithm from scratch.' 
+				print ('Algorithm is probably in a local minimum! Restarting the algorithm from scratch.' )
 
 		if succctr >= succtolerance:
 			data.sigma_stdev = min(2 * data.sigma_stdev, sigma_stdev_default)

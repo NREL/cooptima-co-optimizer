@@ -49,7 +49,7 @@ clr = ['fuchsia', 'b', 'g', 'r', 'y', 'm', 'c', 'k', 'g', 'r', 'y', 'm']
 mrk = ['o', 'x', 's', '^', '<', '*', 'o', 'o', 'x', 'x', 'x', 'x', 'x']
 
 #-----------------------------------
-def wrapper_func((n,varID,propDB, KK)):
+def wrapper_func(n,varID,propDB, KK):
     np.random.seed(n)
     ncomp, spc_names, propvec = make_property_vector_all_sample_cost_UP_single(propDB, change_name) #only randomly sample cost for one (change_name) fuel component
     #print(propvec['COST'], ncomp)
@@ -58,7 +58,7 @@ def wrapper_func((n,varID,propDB, KK)):
     return Pfront, propvec, spc_names
 
 
-def wrapper_func_all((n,propDB, KK)): #randomly samples cost for all fuel components
+def wrapper_func_all(n,propDB, KK): #randomly samples cost for all fuel components
     np.random.seed(n)
     ncomp, spc_names, propvec = make_property_vector_all_sample_cost(propDB)
     Pfront = run_optmize_nsga2(KK, propvec, propDB) #Pfront = [-merit, cost, obj3]
@@ -109,7 +109,7 @@ if __name__ == '__main__':
 
     output_files = []
 
-    for t, v in cooptimizer_input.task_list.iteritems():
+    for t, v in cooptimizer_input.task_list.items():
         if v:
             ans = 'Yes'
         else:
