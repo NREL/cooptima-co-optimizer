@@ -1,20 +1,21 @@
 Co-optimization of fuels and engines Co-optimizer
 =================================================
 
-This collection of python scripts is the first (internal) release of the co-optimizer,
+This collection of python scripts is the co-optimizer,
 or the co-optima scenario analysis tool.
 
-This release (V0.1) is not intended for broad distribution, and should not be 
-shared outside of co-optima.
+This release (V0.2) is intended primarily to analysis such as done to support co-optima project planning and identification of potentially fruitful research directions rather than specify particular fuel blends. 
 
 The intention of this release is to add concreteness to the co-optimization concepts, 
-and facilitate discussion between the teams as the tool evolves.
+and facilitate discussion between the teams and stakeholders as the tool evolves.
+
+The user interface is currently non-existant from a productions standpoint.
 
 Questions, comments, and rants can be directed to Ray.Grout@nrel.gov
 
 Availability:
 -------------
-Currently, the code is hosted on github in a private repository.
+The code is hosted on github in a private repository.
 
 For access, follow the following steps:
 
@@ -94,7 +95,7 @@ in the input file `cooptimizer_input.py`. Note that as of this release, only the
 
 The co-optimizer is run by::
 
-python co_optimizer.py
+python co_optimizer_par.py
 
 
 Methodology
