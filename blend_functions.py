@@ -11,11 +11,11 @@ Authors: Ray Grout and Juliane Mueller
 
 
 This file is part of the Co-optimizer, developed as part of the Co-Optimization
-of Fuels & Engines (Co-Optima) project sponsored by the U.S. Department of 
-Energy (DOE) Office of Energy Efficiency and Renewable Energy (EERE), Bioenergy 
-Technologies and Vehicle Technologies Offices. (Optional): Co-Optima is a 
-collaborative project of multiple national laboratories initiated to 
-simultaneously accelerate the introduction of affordable, scalable, and 
+of Fuels & Engines (Co-Optima) project sponsored by the U.S. Department of
+Energy (DOE) Office of Energy Efficiency and Renewable Energy (EERE), Bioenergy
+Technologies and Vehicle Technologies Offices. (Optional): Co-Optima is a
+collaborative project of multiple national laboratories initiated to
+simultaneously accelerate the introduction of affordable, scalable, and
 sustainable biofuels and high-efficiency, low-emission vehicle engines.
 
 """
@@ -25,6 +25,7 @@ from pyomo.environ import *
 import scipy.interpolate as interp
 
 import matplotlib.pyplot as plt
+
 
 # General blend function - not currently used
 def blend_fcn(prop, propDB, comp):
@@ -82,13 +83,12 @@ def blend_linear_pyomo(model, whichprop):
 def blend_linear_vec(x_vec, prop_vec, whichprop):
     return np.sum(x_vec*prop_vec[whichprop])
 
+
 def blend_fancy_vec(x_vec, prop_vec, whichprop):
     if whichprop == 'RON':
         # Need volume fractions
         x_volume = get_other_fractions(x_vec, prop_vec, 'VOLUME')
-        #print x_volume
         x_mass = get_other_fractions(x_vec, prop_vec, 'MASS')
-        #print "x_mass", x_mass
         bRON = np.zeros(len(x_vec))
         for i in range(len(x_vec)):
             if prop_vec['BOB'][i] == 1:
@@ -105,23 +105,17 @@ def blend_fancy_vec(x_vec, prop_vec, whichprop):
                         x1 = (prop_vec["vol_frac_bRON_{}".format(ib)][i])
                         r1 = (prop_vec["blend_RON_bRON_{}".format(ib)][i])
 
-                        bRON_y.append( (r1 - (1.0-x1)*r0)/x1)
-                        bRON_x.append( (x1) )
+                        bRON_y.append((r1 - (1.0-x1)*r0)/x1)
+                        bRON_x.append((x1))
                         ib += 1
 
                     bRON_y.append(prop_vec['RON'][i])
-                    bRON_x.append( (1.0) )
+                    bRON_x.append((1.0))
 
                     plt.show()
-                    bRON_fcn = interp.interp1d(bRON_x, bRON_y, fill_value='extrapolate')     
+                    bRON_fcn = interp.interp1d(bRON_x, bRON_y,
+                                               fill_value='extrapolate')
                     bRON[i] = bRON_fcn(x_volume[i])
-                    #print '-----------------------'
-                    #if x_volume[i] > 0:
-                    #    print "i = ", i
-                    #    print bRON_x
-                    #    print bRON_y
-                    #    print bRON[i]
-                    #print '-----------------------'
                 else:
                     bRON[i] = prop_vec['RON'][i]
         return np.sum(x_volume*bRON)
@@ -129,9 +123,7 @@ def blend_fancy_vec(x_vec, prop_vec, whichprop):
     if whichprop == 'S':
         # Need volume fractions
         x_volume = get_other_fractions(x_vec, prop_vec, 'VOLUME')
-        #print x_volume
 
-        #print "x_mass", x_mass
         bS = np.zeros(len(x_vec))
         for i in range(len(x_vec)):
             if prop_vec['BOB'][i] == 1:
@@ -148,23 +140,17 @@ def blend_fancy_vec(x_vec, prop_vec, whichprop):
                         x1 = (prop_vec["vol_frac_bS_{}".format(ib)][i])
                         r1 = (prop_vec["blend_S_bS_{}".format(ib)][i])
 
-                        bS_y.append( (r1 - (1.0-x1)*r0)/x1)
-                        bS_x.append( (x1) )
+                        bS_y.append((r1 - (1.0-x1)*r0)/x1)
+                        bS_x.append((x1))
                         ib += 1
 
                     bS_y.append(prop_vec['S'][i])
-                    bS_x.append( (1.0) )
+                    bS_x.append((1.0))
 
                     plt.show()
-                    bS_fcn = interp.interp1d(bS_x, bS_y, fill_value='extrapolate')     
+                    bS_fcn = interp.interp1d(bS_x, bS_y,
+                                             fill_value='extrapolate')
                     bS[i] = bS_fcn(x_volume[i])
-                    #print '-----------------------'
-                    #if x_volume[i] > 0:
-                    #    print "i = ", i
-                    #    print bRON_x
-                    #    print bRON_y
-                    #    print bRON[i]
-                    #print '-----------------------'
                 else:
                     bS[i] = prop_vec['S'][i]
         return np.sum(x_volume*bS)
@@ -192,17 +178,16 @@ def blend_fancy_vec(x_vec, prop_vec, whichprop):
     else:
         return blend_linear_vec(x_vec, prop_vec, whichprop)
 
-
     # Build function for bRON, bMON on the fly
     # If fuel is pure component, RON is the bRON at that fraction
     # If fuel is blendstock, RON is the measured RON
-    
+
     # Mass, mole, energy, volume weighted as appropriate
 
     # AFR, HoV, PMI - mass basis
     # RON, MON, S - bRON, bMON, bS, volume basis
     # LFV150 - volume basis
-    # 
+
 
 def get_other_fractions(x_vec, prop_vec, whichbasis):
     if whichbasis is 'VOLUME':
@@ -224,7 +209,6 @@ def get_other_fractions(x_vec, prop_vec, whichbasis):
         # w_avg = sum(w_i x_i)
         # y_i = w_i*x_i/w_avg
 
-
     if whichbasis is 'ENERGY':
         pass
         # Need LHV on mole basis; assume db is in kJ/kg
@@ -233,27 +217,15 @@ def get_other_fractions(x_vec, prop_vec, whichbasis):
 
 def volume_to_other(v_vec, prop_vec, whichbasis='MOLE'):
     if whichbasis is 'MOLE':
-        
-        # print "molwt: ", prop_vec['MOLWT']
         x = v_vec*prop_vec['DENSITY']/prop_vec['MOLWT']
         x_frac = x/np.sum(x)
         return x_frac
-
-        # Need density on mole basis
-        # V_i  in g/cm^3 from database
-        # V_i/w_i should be mol/cm^3
-        # V = sum(x_i/(V_i/w_i))
-        # vfrac_i = x_i/(V_i/w_i)/V
 
     if whichbasis is 'MASS':
         pass
 
 
-
 def get_bRON_fcns(fp):
-
-#    print fp
-
     bRON_dict = {}
     bMON_dict = {}
     bS_dict = {}
@@ -272,15 +244,13 @@ def get_bRON_fcns(fp):
             x1 = (fuel["vol_frac_bRON_{}".format(ib)])
             r1 = (fuel["blend_RON_bRON_{}".format(ib)])
 
-            bRON_y.append( (r1 - (1.0-x1)*r0)/x1)
-            bRON_x.append( (x1) )
+            bRON_y.append((r1 - (1.0-x1)*r0)/x1)
+            bRON_x.append((x1))
 
-            # Maybe put in pure component RON at x=1.0?
-            
             ib += 1
-        
-        bRON = interp.interp1d(bRON_x, bRON_y, fill_value='extrapolate')       
-        bRON_dict[fname] = bRON        
+
+        bRON = interp.interp1d(bRON_x, bRON_y, fill_value='extrapolate')
+        bRON_dict[fname] = bRON
 
         ib = 0
         bMON_y = []
@@ -293,19 +263,18 @@ def get_bRON_fcns(fp):
             x1 = (fuel["vol_frac_bMON_{}".format(ib)])
             r1 = (fuel["blend_MON_bMON_{}".format(ib)])
 
-            bMON_y.append( (r1 - (1.0-x1)*r0)/x1)
-            bMON_x.append( (x1) )
+            bMON_y.append((r1 - (1.0-x1)*r0)/x1)
+            bMON_x.append((x1))
 
-            print (" computing bMON for :{}, {}".format(ib, fname))
-            print ("    base MON : {}".format(r0))
-            print ("    vol_frac : {}".format(x1))
-            print ("    blend MON : {}".format(r1))
-            # Maybe put in pure component RON at x=1.0?
-            
+            print(" computing bMON for :{}, {}".format(ib, fname))
+            print("    base MON : {}".format(r0))
+            print("    vol_frac : {}".format(x1))
+            print("    blend MON : {}".format(r1))
+
             ib += 1
-        
-        bMON = interp.interp1d(bMON_x, bMON_y, fill_value='extrapolate')       
-        bMON_dict[fname] = bMON  
+
+        bMON = interp.interp1d(bMON_x, bMON_y, fill_value='extrapolate')
+        bMON_dict[fname] = bMON
 
         ib = 0
         bS_y = []
@@ -317,17 +286,12 @@ def get_bRON_fcns(fp):
             x1 = (fuel["vol_frac_bS_{}".format(ib)])
             r1 = (fuel["blend_S_bS_{}".format(ib)])
 
-            bS_y.append( (r1 - (1.0-x1)*r0)/x1)
-            bS_x.append( (x1) )
+            bS_y.append((r1 - (1.0-x1)*r0)/x1)
+            bS_x.append((x1))
 
-            # Maybe put in pure component RON at x=1.0?
-            
             ib += 1
-        
-        bS = interp.interp1d(bS_x, bS_y, fill_value='extrapolate')       
-        bS_dict[fname] = bS  
 
+        bS = interp.interp1d(bS_x, bS_y, fill_value='extrapolate')
+        bS_dict[fname] = bS
 
     return bRON_dict, bMON_dict, bS_dict
-
-
