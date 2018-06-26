@@ -19,12 +19,6 @@ Contents:
 
 
 
-README
-======
-.. _README:
-
-.. include:: ../README.rst
-
 
 Indices and tables
 ==================

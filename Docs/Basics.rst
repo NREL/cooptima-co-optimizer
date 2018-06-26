@@ -5,7 +5,7 @@ Input files
 -----------
 
 #. Input scripts
-	The behaviour of the co-optimizer is controlled by the entires in the cooptimizer_input.py file.
+	The behavior of the co-optimizer is controlled by the entires in the cooptimizer_input.py file.
 
 #.  Fuel properties database
 	The fuel properties that are used to estimate blend properties and ultimately evaluate the merit function are read in from a spreadsheet formatted like the example provided and specified in the cooptimizer_input.py file:
@@ -14,7 +14,7 @@ Input files
 		component_properties_database = 'prop_db_AMR.xls'
 
 #. Component cost
-	Component costs are read from a separate database, with an example formate provided and also specified in the cooptimizer_input.py fiel:
+	Component costs are read from a separate database, with an example format provided and also specified in the cooptimizer_input.py file:
 	::
 
 		component_cost_database = 'cost_db_AMR_OG.xlsx'
@@ -30,9 +30,8 @@ Apart from optimizing a multi-component blend, the co-optimizer also provides so
 
 ::
 	
-	from fuelsdb_interface import load_propDB, make_property_vector,\
-	                          make_property_vector_sample_cost,\
-	                          make_property_vector_all
+	from fuelsdb_interface import load_propDB, make_property_vector
+	
 	propDB = load_propDB('testDB.xls')
 	ncomp, spids, propvec = make_property_vector_all(propDB)
 

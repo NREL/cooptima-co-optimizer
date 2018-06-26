@@ -2,7 +2,15 @@ Introduction
 ============
 
 
+README
+------
+.. _README:
 
-* Co-optimizer Structure
+.. include:: ../README.rst
+
+Co-optimizer Structure
+----------------------
+
+A schematic of the files that are used in a typical co-optimizer analysis using the genetic algorithms approach is shown below:
 
 .. image:: file_hierarchy.pdf
