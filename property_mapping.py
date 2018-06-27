@@ -1,5 +1,5 @@
 # -*- coding: utf-8; -*-
-"""property_mapping.py: Functions to map the properties necessary for merit 
+"""property_mapping.py: Functions to map the properties necessary for merit
 function evaluation to the properties in the database
 --------------------------------------------------------------------------------
 Developed by the NREL Computational Science Center
@@ -11,11 +11,11 @@ Authors: Ray Grout and Juliane Mueller
 
 
 This file is part of the Co-optimizer, developed as part of the Co-Optimization
-of Fuels & Engines (Co-Optima) project sponsored by the U.S. Department of 
-Energy (DOE) Office of Energy Efficiency and Renewable Energy (EERE), Bioenergy 
-Technologies and Vehicle Technologies Offices. (Optional): Co-Optima is a 
-collaborative project of multiple national laboratories initiated to 
-simultaneously accelerate the introduction of affordable, scalable, and 
+of Fuels & Engines (Co-Optima) project sponsored by the U.S. Department of
+Energy (DOE) Office of Energy Efficiency and Renewable Energy (EERE), Bioenergy
+Technologies and Vehicle Technologies Offices. (Optional): Co-Optima is a
+collaborative project of multiple national laboratories initiated to
+simultaneously accelerate the introduction of affordable, scalable, and
 sustainable biofuels and high-efficiency, low-emission vehicle engines.
 
 """
@@ -78,15 +78,15 @@ def HoV(dbprops):
                                     'Pure_Molecular_Weight']):
             return 0.0
         return \
-            float(dbprops['Pure_Heat_of_Vaporization'])\
-          / float(dbprops['Pure_Molecular_Weight'])*1000.0
+            float(dbprops['Pure_Heat_of_Vaporization']) / \
+            float(dbprops['Pure_Molecular_Weight'])*1000.0
 
     elif dbprops['___Identifier'] == 'Fuel Blends':
         if not check_data(dbprops, ['Blend_Heat_of_Vaporization',
                           'Blend_Molecular_Weight']):
             return 0.0
-        return float(dbprops['Blend_HoV_temp']) \
-             / float(dbprops['Blend_Molecular_Weight'])*1000.0
+        return float(dbprops['Blend_HoV_temp']) /\
+            float(dbprops['Blend_Molecular_Weight'])*1000.0
 
 
 def laminar_flame_speed(dbprops):

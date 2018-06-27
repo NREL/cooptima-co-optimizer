@@ -13,11 +13,11 @@ http://matplotlib.org/examples/api/radar_chart.html
 
 
 This file is part of the Co-optimizer, developed as part of the Co-Optimization
-of Fuels & Engines (Co-Optima) project sponsored by the U.S. Department of 
-Energy (DOE) Office of Energy Efficiency and Renewable Energy (EERE), Bioenergy 
-Technologies and Vehicle Technologies Offices. (Optional): Co-Optima is a 
-collaborative project of multiple national laboratories initiated to 
-simultaneously accelerate the introduction of affordable, scalable, and 
+of Fuels & Engines (Co-Optima) project sponsored by the U.S. Department of
+Energy (DOE) Office of Energy Efficiency and Renewable Energy (EERE), Bioenergy
+Technologies and Vehicle Technologies Offices. (Optional): Co-Optima is a
+collaborative project of multiple national laboratories initiated to
+simultaneously accelerate the introduction of affordable, scalable, and
 sustainable biofuels and high-efficiency, low-emission vehicle engines.
 
 """
@@ -180,10 +180,11 @@ def plot_prop_parallel(proplist):
     for prop in proplist:
         nd_props = []
         for p in prop_order:
-            print ("normalizing: {} by min/range: {}, {}".format(prop[p], min_per_prop[p], range_per_prop[p]))
+            print("normalizing: {} by min/range: {}, {}".
+                  format(prop[p], min_per_prop[p], range_per_prop[p]))
             if np.abs(range_per_prop[p]) > 0.0:
                 normval = ((prop[p] - min_per_prop[p])/range_per_prop[p])
-                print ("norm val = {}".format(normval))
+                print("norm val = {}".format(normval))
                 nd_props.append(normval)
             else:
                 nd_props.append(0.5)

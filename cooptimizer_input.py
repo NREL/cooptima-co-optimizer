@@ -10,17 +10,17 @@ Authors: Ray Grout and Juliane Mueller
 
 
 This file is part of the Co-optimizer, developed as part of the Co-Optimization
-of Fuels & Engines (Co-Optima) project sponsored by the U.S. Department of 
-Energy (DOE) Office of Energy Efficiency and Renewable Energy (EERE), Bioenergy 
-Technologies and Vehicle Technologies Offices. (Optional): Co-Optima is a 
-collaborative project of multiple national laboratories initiated to 
-simultaneously accelerate the introduction of affordable, scalable, and 
+of Fuels & Engines (Co-Optima) project sponsored by the U.S. Department of
+Energy (DOE) Office of Energy Efficiency and Renewable Energy (EERE), Bioenergy
+Technologies and Vehicle Technologies Offices. (Optional): Co-Optima is a
+collaborative project of multiple national laboratories initiated to
+simultaneously accelerate the introduction of affordable, scalable, and
 sustainable biofuels and high-efficiency, low-emission vehicle engines.
-
 """
 
-
-task_list = {} #the optimizations to be done -- several options should be possible iteratively or in parallel
+# the optimizations to be done -- several options should
+# be possible iteratively or in parallel
+task_list = {}
 displacement_setup = {}
 property_min = {}
 property_max = {}
@@ -45,8 +45,10 @@ task_list['cost_vs_merit_Pareto_UP_single'] = False
 task_list['cost_vs_merit_Pareto_UP'] = False
 
 
-#TODO: work out how to get distribution of merit possible for a given target cost
-#      based on uncertainty in cost properties. Do by sampling. Then we can put in bin+-delta.
+# TODO: work out how to get distribution of merit possible for a
+#       given target cost
+#       based on uncertainty in cost properties.
+#       Do by sampling. Then we can put in bin+-delta.
 
 # Run a tradeoff analysis between engine design and obtainable merit function
 task_list['K_vs_merit_sweep'] = False
@@ -55,7 +57,9 @@ task_list['K_vs_merit_sweep'] = False
 task_list['K_sampling'] = False
 k_sampling_datafilename = 'k_sampling.txt'
 k_sampling_plotfilename = 'k_sampling.pdf'
-nsamples = 5#30 #number of random numbers used for each cost (basically nsamples runs of the optimizer with different random numbers)
+# number of random numbers used for each cost
+# (basically nsamples runs of the optimizer with different random numbers)
+nsamples = 5  # 30
 kmean = 0.5
 kvar = 1.0
 
@@ -67,45 +71,45 @@ UP_plotfilename = 'UP.pdf'
 
 
 if task_list['cost_vs_merit_Pareto'] or task_list['mean_vs_var_Pareto'] or task_list['UPMO'] or task_list['K_vs_merit_sweep']:
-	parallel_nsgaruns =False	
+    parallel_nsgaruns = False
 else:
-	parallel_nsgaruns =True
+    parallel_nsgaruns = True
 
 # Coefficients in merit function indicating potential improvement
 sen_mean = {}
-sen_mean['ON']= 1.0/1.6
+sen_mean['ON'] = 1.0/1.6
 sen_mean['ONHoV'] = 0.01
 sen_mean['HoV'] = 1.0/130.0
-sen_mean['SL'] = 1./5.4 #old:1.0/3.0
+sen_mean['SL'] = 1./5.4  # old:1.0/3.0
 sen_mean['LFV150'] = 1.0
-sen_mean['PMIFIX'] = 0.7#old:0.67
+sen_mean['PMIFIX'] = 0.7  # old:0.67
 sen_mean['PMIVAR'] = 0.5
 
 sen_var = {}
-mul = 0.1 #orig: .1
-sen_var['ON']= 1.0/1.6*mul
+mul = 0.1  # orig: .1
+sen_var['ON'] = 1.0/1.6*mul
 sen_var['ONHoV'] = 0.01*mul
 sen_var['HoV'] = 1.0/130.0*mul
-sen_var['SL'] = 1./5.4*mul#old:1.0/3.0*mul
+sen_var['SL'] = 1./5.4*mul  # old:1.0/3.0*mul
 sen_var['LFV150'] = mul
-sen_var['PMIFIX'] = 0.7*mul#old:0.67*mul
+sen_var['PMIFIX'] = 0.7*mul  # old:0.67*mul
 sen_var['PMIVAR'] = 0.5*mul
 
 # Coefficients in merit function indicating reference fuel properties
 ref_mean = {}
-ref_mean['RON'] = 91. #old:92.0
-ref_mean['S'] = 8.#old:10.0
+ref_mean['RON'] = 91.  # old:92.0
+ref_mean['S'] = 8.  # old:10.0
 ref_mean['HoV'] = 415.0
 ref_mean['SL'] = 46.0
-ref_mean['PMI'] = 1.6 #old:2.0
+ref_mean['PMI'] = 1.6  # old:2.0
 
 ref_var = {}
 tul = 1
 ref_var['RON'] = 8.0*tul
-ref_var['S'] = 8.*tul #10.0*tul
+ref_var['S'] = 8.*tul  # 10.0*tul
 ref_var['HoV'] = 20.0*tul
 ref_var['SL'] = 2.0*tul
-ref_var['PMI'] = 1.6*tul#old:2.0*tul
+ref_var['PMI'] = 1.6*tul  # old:2.0*tul
 
 # Find the composition that maximizes the merit function subject to constraints
 # below - NOT YET IMPLEMENTED,  PLACEHOLDER FOR FUTURE DEV
@@ -132,12 +136,12 @@ component_cost_database = 'cost_db_AMR_OG.xlsx'
 
 # -----------------------------------------------------------------------------
 # Output file names
-cost_vs_merit_datafilename = "cost_revmerit_pareto.txt"#for pyomo
+cost_vs_merit_datafilename = "cost_revmerit_pareto.txt"  # for pyomo
 cost_vs_merit_plotfilename = "cost_revmerit_pareto"
 
 
 mean_vs_var_merit_plotfilename = "mean_var_merit_pareto"
-mean_vs_var_merit_datafilename = "mean_var_merit_pareto.txt"#for pyomo
+mean_vs_var_merit_datafilename = "mean_var_merit_pareto.txt"  # for pyomo
 
 cost_vs_merit_Pareto_UP_single_plotfilename = "UPsingle_cost_vs_merit_pareto"
 cost_vs_merit_Pareto_UP_single_datafilename = "UPsingle_cost_vs_merit_pareto.txt"
@@ -161,11 +165,9 @@ k_sweep_plotfilename = "ksweep.pdf"
 
 # -----------------------------------------------------------------------------
 # Running multiple "K" values in merit function
-#KVEC = [-2.0, -1.5, -1.0,-0.5, 0.5,  1.0, 1.5,2.0,2.5,3.0,3.5,4.0] #-vector
+# KVEC = [-2.0, -1.5, -1.0,-0.5, 0.5,  1.0, 1.5,2.0,2.5,3.0,3.5,4.0] #-vector
 KVEC = [-1.25]  # -vector
-#KVEC = [-2.0, -1.25, -0.5]  # -vector
-#KVEC = [-1.25]#, 3, 4]#[-2., -1., 1., 2., 3., 4.]  # -vector
-#KVEC = [-2, -1, 1, 2, 3, 4]#
+
 
 # -----------------------------------------------------------------------------
 # Constraints on minimum/maximum mole fraction of a given component

@@ -102,9 +102,9 @@ def train_GP(X, y, scaler):
 
     stdev = 20
     kernel = (1.0 * Matern(length_scale=5*np.ones(X.shape[1]),
-                           length_scale_bounds=(1e-1, 1e1), nu=2.5)
-              + WhiteKernel(noise_level=stdev,
-                            noise_level_bounds=(1e-1, 2e1)))
+                           length_scale_bounds=(1e-1, 1e1), nu=2.5) +
+              WhiteKernel(noise_level=stdev,
+                          noise_level_bounds=(1e-1, 2e1)))
 
     X_ = scaler.transform(X)
 
@@ -149,5 +149,5 @@ if __name__ == "__main__":
     lll
     print(predict_GP(A, B, np.array([[10, 40, 8., 100., 5., 400]])))
 
-    lower = np.array([ 6.7,  35.,    2.,  99.2,    0., 303.])
+    lower = np.array([06.7,  35.,    2.,  99.2,    0., 303.])
     upper = np.array([23.8,  90.,  10.5, 105.6,  12.2, 595.])
