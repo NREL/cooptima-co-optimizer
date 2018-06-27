@@ -1,5 +1,5 @@
 # -*- coding: utf-8; -*-
-"""optimizer.py: PYOMO based approach to cost-merit Pareto front identification 
+"""optimizer.py: PYOMO based approach to cost-merit Pareto front identification
 properties database and also simplified spreadsheets based on the list of 20
 or similar downselects
 --------------------------------------------------------------------------------
@@ -12,11 +12,11 @@ Authors: Ray Grout and Juliane Mueller
 
 
 This file is part of the Co-optimizer, developed as part of the Co-Optimization
-of Fuels & Engines (Co-Optima) project sponsored by the U.S. Department of 
-Energy (DOE) Office of Energy Efficiency and Renewable Energy (EERE), Bioenergy 
-Technologies and Vehicle Technologies Offices. (Optional): Co-Optima is a 
-collaborative project of multiple national laboratories initiated to 
-simultaneously accelerate the introduction of affordable, scalable, and 
+of Fuels & Engines (Co-Optima) project sponsored by the U.S. Department of
+Energy (DOE) Office of Energy Efficiency and Renewable Energy (EERE), Bioenergy
+Technologies and Vehicle Technologies Offices. (Optional): Co-Optima is a
+collaborative project of multiple national laboratories initiated to
+simultaneously accelerate the introduction of affordable, scalable, and
 sustainable biofuels and high-efficiency, low-emission vehicle engines.
 
 """
@@ -107,13 +107,13 @@ def run_optimize_vs_C(cstar, KK, propDB, initial_X=None):
         if (result.solver.status == SolverStatus.ok):
             isok = True
         else:
-            print ("... Something wrong, maybe try restaring "\
-                  " trying to find a new starting place from a"\
+            print("... Something wrong, maybe try restaring "
+                  " trying to find a new starting place from a"
                   " perturbed problem")
             newcomp, perturbok = run_optimize_vs_C(cstar*1.1, KK,
-                                    propDB, initial_X=None)
+                                                   propDB, initial_X=None)
             if (perturbok):
-                print ("... Perturbed solution succeeded, "\
+                print("... Perturbed solution succeeded, "
                       "setting up to restart from it")
                 for i in range(1, ncomp+1):
                     model.X[i].value = newcomp[spc_names[i-1]]
@@ -121,16 +121,16 @@ def run_optimize_vs_C(cstar, KK, propDB, initial_X=None):
                 perturbokresult = opt.solve(model,
                                             options={'max_iter': 10000})
                 if (perturbokresult.solver.status == SolverStatus.ok):
-                    print ("... Found solution to original problem"
-                           " from perturbed solution, success")
+                    print("... Found solution to original problem"
+                          " from perturbed solution, success")
                     isok = True
                 else:
-                    print ("... Failed to find solution to original"\
+                    print("... Failed to find solution to original"
                           " problem from perturbed solution")
                     isok = False
 
             else:
-                print ("... Perturbed solution failed")
+                print("... Perturbed solution failed")
                 isok = False
         # print result
         # print("\nDisplaying Soluiton\n" + '-'*60)
@@ -144,7 +144,7 @@ def run_optimize_vs_C(cstar, KK, propDB, initial_X=None):
         return comp, isok
 
 
-def run_optimize_vs_K(KK, propDB, initial_X=None,ref=None,sen=None):
+def run_optimize_vs_K(KK, propDB, initial_X=None, ref=None, sen=None):
         print("Running optimizer based on IPOPT for KK={}".format(KK))
         ncomp, spc_names, propvec = make_property_dict(propDB)
 
@@ -162,18 +162,18 @@ def run_optimize_vs_K(KK, propDB, initial_X=None,ref=None,sen=None):
             this_SL = blend_linear_pyomo(model, 'SL')
             this_LFV150 = blend_linear_pyomo(model, 'LFV150')
             this_PMI = blend_linear_pyomo(model, 'PMI')
-            if( ref is None):
+            if(ref is None):
                 return mmf_single(RON=this_ron, S=this_s, HoV=this_HoV,
                                   SL=this_SL, K=KK)
             else:
-                return mmf_single_param(ref,sen, RON=this_ron, S=this_s, HoV=this_HoV,
-                                        SL=this_SL, K=KK)
+                return mmf_single_param(ref, sen, RON=this_ron, S=this_s,
+                                        HoV=this_HoV, SL=this_SL, K=KK)
 
         def fraction_constraint(model):
             # Need fractions to sum to unity
             return (np.abs(summation(model.X) - 1.0) <= 1.0e-3)
 
-    #    pyomo formulation
+        # pyomo formulation
         model = ConcreteModel()
 
         # Properties as parameters
@@ -218,29 +218,29 @@ def run_optimize_vs_K(KK, propDB, initial_X=None,ref=None,sen=None):
         if (result.solver.status == SolverStatus.ok):
             isok = True
         else:
-            print( "... Something wrong, maybe try restaring "\
-                  " trying to find a new starting place from a"\
+            print("... Something wrong, maybe try restaring "
+                  " trying to find a new starting place from a"
                   " perturbed problem")
             newcomp, perturbok = run_optimize_vs_K(KK*1.1, propDB,
                                                    initial_X=None)
             if (perturbok):
-                print ("... Perturbed solution succeeded,"\
+                print("... Perturbed solution succeeded,"
                       " setting up to restart from it")
                 for i in range(1, ncomp+1):
                     model.X[i].value = newcomp[spc_names[i-1]]
 
                 perturbokresult = opt.solve(model, options={'max_iter': 10000})
                 if (perturbokresult.solver.status == SolverStatus.ok):
-                    print ("... Found solution to original problem \
-                    from perturbed solution, success")
+                    print("... Found solution to original problem"
+                          " from perturbed solution, success")
                     isok = True
                 else:
-                    print ("... Failed to find solution to original"\
+                    print("... Failed to find solution to original"
                           " problem from perturbed solution")
                     isok = False
 
             else:
-                print ("... Perturbed solution failed")
+                print("... Perturbed solution failed")
                 isok = False
         # print result
         # print("\nDisplaying Soluiton\n" + '-'*60)
@@ -274,7 +274,7 @@ def comp_to_cost_mmf(comp, propDB, k):
         return cost, mmf
 
 
-def comp_to_mmf(comp, propDB, k,ref=None,sen=None):
+def comp_to_mmf(comp, propDB, k, ref=None, sen=None):
         # Evaluate resulting mmf value
         # print comp
         prop_list = ['RON', 'S', 'HoV', 'SL', 'LFV150', 'PMI']
@@ -282,13 +282,14 @@ def comp_to_mmf(comp, propDB, k,ref=None,sen=None):
         for p in prop_list:
             props[p] = blend_linear_propDB(p, propDB, comp)
         if ref is None and sen is None:
-            mmf = mmf_single(RON=props['RON'], S=props['S'], 
+            mmf = mmf_single(RON=props['RON'], S=props['S'],
                              HoV=props['HoV'], SL=props['SL'],
                              LFV150=props['LFV150'], PMI=props['PMI'], K=k)
-        else:   
-            mmf = mmf_single_param(ref,sen,RON=props['RON'], S=props['S'], 
+        else:
+            mmf = mmf_single_param(ref, sen, RON=props['RON'], S=props['S'],
                                    HoV=props['HoV'], SL=props['SL'],
-                                   LFV150=props['LFV150'], PMI=props['PMI'], K=k)
+                                   LFV150=props['LFV150'], PMI=props['PMI'],
+                                   K=k)
         cost = blend_linear_propDB('COST', propDB, comp)
 
         return mmf
